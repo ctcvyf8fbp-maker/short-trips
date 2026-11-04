@@ -28,7 +28,7 @@ const TRIPS = [
 
     approvals: [
       { role: "מפקד היחידה", status: "אושר", date: "" },
-      { role: "מפקד מש\"ב", status: "אושר", date: "" },
+      { role: "מפקד מש\"ב", status: "ממתין", date: "" },
       { role: "דבל\"א", status: "אושר", date: "" },
       { role: "יחב\"ם", status: "אושר", date: "" },
       { role: "קמנ\"ר", status: "אושר", date: "" },
