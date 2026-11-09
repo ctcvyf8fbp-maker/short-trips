@@ -108,6 +108,27 @@
   .yes .tag { color: var(--ok); font-weight: 600; }
   .count { color: var(--muted); font-weight: 400; font-size: .95rem; }
 
+  .meta { color: var(--muted); margin-top: 4px; }
+  .notes { margin-top: 14px; padding: 10px 14px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); }
+  .notes b { display: block; font-size: .85rem; color: var(--muted); font-weight: 600; }
+  .alert { margin-top: 14px; padding: 12px 14px; border-radius: 10px; font-weight: 700; background: var(--no-bg); color: var(--no); border: 1px solid var(--no); }
+
+  .sum-title { font-family: "Secular One", "Assistant", sans-serif; font-weight: 400; font-size: clamp(1.8rem, 5vw, 2.6rem); margin: 0 0 16px; }
+  .sum-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .sum-card {
+    display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; align-items: center; width: 100%; text-align: start;
+    font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; cursor: pointer;
+  }
+  .sum-card:hover { border-color: var(--accent); }
+  .sum-card.urgent { border-color: var(--no); border-inline-start-width: 5px; }
+  .sum-card h3 { margin: 0; font-size: 1.2rem; }
+  .sum-card .when { font-weight: 700; color: var(--accent); white-space: nowrap; }
+  .sum-card.urgent .when { color: var(--no); }
+  .sum-card .facts { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--muted); font-size: .95rem; }
+  .sum-card .facts b { color: var(--ink); }
+  .sum-card .track { grid-column: 1 / -1; margin-top: 4px; }
+  .sum-card .warn { grid-column: 1 / -1; color: var(--no); font-weight: 700; font-size: .95rem; }
+
   .banner { margin-top: 14px; padding: 10px 14px; border-radius: 10px; font-weight: 700; background: var(--sbg); color: var(--sc); }
 </style>
 </head>
@@ -158,8 +179,62 @@
       </li>`).join("")}</ul>`;
   }
 
+  const URGENT_DAYS = 14;   // כמה ימים לפני היציאה להתחיל להזהיר
+
+  function daysLeft(t) {
+    const st = parse(t.start); if (!st) return null;
+    const now = new Date(); const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return Math.round((st - today) / DAY);
+  }
+  function stats(t) {
+    const steps = t.approvals || [], docs = t.documents || [], people = t.participants || [];
+    const approved = steps.filter(s => s.status === "אושר").length;
+    const docsReady = docs.filter(d => isYes(d.ready)).length;
+    const visas = people.filter(p => isYes(p.visa)).length;
+    const d = daysLeft(t);
+    const missing = [];
+    if (approved < steps.length) missing.push(`${steps.length - approved} אישורים`);
+    if (docsReady < docs.length) missing.push(`${docs.length - docsReady} מסמכים`);
+    const urgent = d !== null && d >= 0 && d <= URGENT_DAYS && missing.length > 0;
+    return { steps, docs, people, approved, docsReady, visas, d, missing, urgent };
+  }
+  function warning(t, st) {
+    if (!st.urgent) return "";
+    const when = st.d === 0 ? "היציאה היום" : st.d === 1 ? "היציאה מחר" : `נשארו ${st.d} ימים ליציאה`;
+    return `${when}, וחסרים עוד ${st.missing.join(" ו-")}`;
+  }
+
+  function showSummary() {
+    const order = trips.map((t, i) => i).sort((a, b) => (trips[a].start || "9").localeCompare(trips[b].start || "9"));
+    document.getElementById("trip").innerHTML = `
+      <h1 class="sum-title">כל הנסיעות</h1>
+      <ul class="sum-list">
+        ${order.map(i => { const t = trips[i], st = stats(t); return `
+          <li><button class="sum-card ${st.urgent ? "urgent" : ""}" data-i="${i}">
+            <h3>${esc(t.name)}</h3>
+            <span class="when">${whenText(t)}</span>
+            <div class="facts">
+              <span>${fmt(t.start)} – ${fmt(t.end)}</span>
+              ${t.destination ? `<span>${esc(t.destination)}</span>` : ""}
+              <span>אישורים: <b>${st.approved}/${st.steps.length}</b></span>
+              <span>מסמכים: <b>${st.docsReady}/${st.docs.length}</b></span>
+              <span>ויזות: <b>${st.visas}/${st.people.length}</b></span>
+            </div>
+            <div class="track" aria-hidden="true">${st.steps.map(s => `<span style="${vars(s.status)}"></span>`).join("")}</div>
+            ${st.urgent ? `<div class="warn">⚠ ${warning(t, st)}</div>` : ""}
+          </button></li>`; }).join("")}
+      </ul>`;
+    document.querySelectorAll(".sum-card").forEach(c => c.addEventListener("click", () => { show(+c.dataset.i); window.scrollTo(0, 0); }));
+    setSelected(-1);
+    document.title = "נסיעות קצרות – מעקב";
+  }
+
+  function setSelected(i) {
+    document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-selected", +b.dataset.i === i));
+  }
+
   function show(i) {
-    const t = TRIPS[i];
+    const t = trips[i];
     const steps = t.approvals || [];
     const approved = steps.filter(s => s.status === "אושר").length;
     const rejected = steps.some(s => s.status === "נדחה");
@@ -175,9 +250,12 @@
       <header class="trip-head">
         <h1>${esc(t.name)}</h1>
         <div class="dates">${fmt(t.start)} – ${fmt(t.end)}<span class="soon">${whenText(t)}</span></div>
+        ${t.destination ? `<div class="meta">יעד: ${esc(t.destination)}</div>` : ""}
         <div class="track" aria-hidden="true">${steps.map(s => `<span style="${vars(s.status)}"></span>`).join("")}</div>
         <div class="track-label">${approved} מתוך ${steps.length} אישורים התקבלו</div>
         ${banner}
+        ${stats(t).urgent ? `<div class="alert">⚠ ${warning(t, stats(t))}</div>` : ""}
+        ${t.notes ? `<div class="notes"><b>הערות</b>${esc(t.notes)}</div>` : ""}
       </header>
 
       <div class="grid">
@@ -209,31 +287,107 @@
         </section>
       </div>`;
 
-    document.querySelectorAll("#tabs button").forEach((b, k) => b.setAttribute("aria-selected", k === i));
+    setSelected(i);
     document.title = t.name + " – נסיעות קצרות";
   }
 
+  let trips = null;
+  let sourceNote = "";
+
   function init() {
-  if (typeof TRIPS === "undefined") {
+  if (!trips) {
     document.getElementById("trip").innerHTML = `<div class="panel"><h2>האתר לא הצליח לקרוא את הנתונים</h2><p class="empty">כנראה יש טעות קטנה בקובץ data.js – למשל פסיק או מירכאה חסרים. בדקו את השינוי האחרון שנעשה בקובץ.</p></div>`;
     return;
   }
-  document.getElementById("updated").textContent = "עודכן: " + fmt(LAST_UPDATED);
-  if (TRIPS.length > 1) {
+  document.getElementById("updated").textContent = sourceNote || ("עודכן: " + fmt(typeof LAST_UPDATED !== "undefined" ? LAST_UPDATED : ""));
+  if (trips.length > 1) {
     const tabs = document.getElementById("tabs");
     tabs.hidden = false;
-    tabs.innerHTML = TRIPS.map((t, i) => `<button role="tab" data-i="${i}">${esc(t.name)}</button>`).join("");
-    tabs.addEventListener("click", e => { const b = e.target.closest("button"); if (b) show(+b.dataset.i); });
-  }
-  if (TRIPS.length) show(0);
+    tabs.innerHTML = `<button role="tab" data-i="-1">כל הנסיעות</button>` +
+      trips.map((t, i) => `<button role="tab" data-i="${i}">${stats(t).urgent ? "⚠ " : ""}${esc(t.name)}</button>`).join("");
+    tabs.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; +b.dataset.i < 0 ? showSummary() : show(+b.dataset.i); });
+    showSummary();
+  } else if (trips.length) show(0);
   else document.getElementById("trip").innerHTML = `<p class="empty">אין נסיעות עדיין. מוסיפים נסיעה בקובץ data.js.</p>`;
+  }
+
+  // ---------- קריאת הנתונים מגיליון Google Sheets ----------
+  function parseCSV(text) {
+    const rows = []; let row = [], cell = "", q = false;
+    for (let k = 0; k < text.length; k++) {
+      const ch = text[k];
+      if (q) {
+        if (ch === '"') { if (text[k + 1] === '"') { cell += '"'; k++; } else q = false; }
+        else cell += ch;
+      } else if (ch === '"') q = true;
+      else if (ch === ",") { row.push(cell); cell = ""; }
+      else if (ch === "\n" || ch === "\r") {
+        if (ch === "\r" && text[k + 1] === "\n") k++;
+        row.push(cell); rows.push(row); row = []; cell = "";
+      } else cell += ch;
+    }
+    if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+    return rows;
+  }
+  function normDate(v) {
+    v = (v || "").trim(); let m;
+    if ((m = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`;
+    if ((m = v.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})/))) return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+    return "";
+  }
+  function sheetToTrips(rows) {
+    const head = (rows[0] || []).map(h => h.trim());
+    const col = name => head.indexOf(name);
+    const cName = col("שם הנסיעה"), cStart = col("תאריך יציאה"), cEnd = col("תאריך חזרה"),
+          cDest = col("יעד"), cNotes = col("הערות"), cPeople = col("משתתפים");
+    if (cName < 0) throw new Error("no header");
+    const aCols = [], dCols = [];
+    head.forEach((h, k) => {
+      if (h.startsWith("אישור:")) aCols.push([k, h.slice(6).trim()]);
+      if (h.startsWith("מסמך:")) dCols.push([k, h.slice(5).trim()]);
+    });
+    const get = (r, k) => (k >= 0 && r[k] != null ? String(r[k]).trim() : "");
+    return rows.slice(1).filter(r => get(r, cName)).map(r => ({
+      name: get(r, cName),
+      start: normDate(get(r, cStart)),
+      end: normDate(get(r, cEnd)),
+      destination: get(r, cDest),
+      notes: get(r, cNotes),
+      participants: get(r, cPeople).split(/[\n,]+/).map(x => x.trim()).filter(Boolean).map(x => {
+        const m = x.match(/^(.*?)\s*[-–:]\s*(יש|אין)\s*$/);
+        return m ? { name: m[1].trim(), visa: m[2] } : { name: x, visa: "אין" };
+      }),
+      approvals: aCols.filter(([k]) => get(r, k) !== "-").map(([k, role]) => ({ role, status: get(r, k) || "ממתין", date: "" })),
+      documents: dCols.filter(([k]) => get(r, k) !== "-").map(([k, name]) => ({ name, ready: get(r, k) || "אין" }))
+    }));
+  }
+  function fromDataJs() {
+    return typeof TRIPS !== "undefined" ? TRIPS : null;
+  }
+
+  async function loadData() {
+    const url = typeof SHEET_CSV_URL !== "undefined" ? SHEET_CSV_URL.trim() : "";
+    if (url) {
+      try {
+        const res = await fetch(url + (url.includes("?") ? "&" : "?") + "t=" + Date.now(), { cache: "no-store" });
+        if (!res.ok) throw new Error(res.status);
+        trips = sheetToTrips(parseCSV(await res.text()));
+        sourceNote = "הנתונים נטענו מהגיליון";
+      } catch (e) {
+        trips = fromDataJs();
+        sourceNote = trips ? "לא הצלחתי לקרוא את הגיליון – מוצגים הנתונים מ-data.js" : "";
+      }
+    } else {
+      trips = fromDataJs();
+    }
+    init();
   }
 
   // טוען תמיד את הגרסה העדכנית של data.js (בלי זיכרון של הדפדפן)
   const dataScript = document.createElement("script");
   dataScript.src = "data.js?v=" + Date.now();
-  dataScript.onload = init;
-  dataScript.onerror = init;
+  dataScript.onload = loadData;
+  dataScript.onerror = loadData;
   document.body.appendChild(dataScript);
 </script>
 </body>
