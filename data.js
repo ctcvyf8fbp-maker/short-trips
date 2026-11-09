@@ -21,10 +21,11 @@ const TRIPS = [
     end: "2026-12-18",
 
     participants: [
-      { name: "משתתף 1", visa: "אין" },
-      { name: "משתתף 2", visa: "אין" },
-      { name: "משתתף 3", visa: "אין" },
-      { name: "משתתף 4", visa: "אין" }
+      { name: " לי יפרח", visa: "אין" },
+      { name: "יונתן עקירב", visa: "אין" },
+      { name: "שקד סבו ", visa: "אין" },
+      { name: "עידן פניגר ", visa: "אין" },
+      { name: "שירן מנחימוב ", visa: "אין" }
     ],
 
     approvals: [
