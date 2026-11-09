@@ -88,35 +88,33 @@ const TRIPS = [
 
   // ===================== נסיעה 3 =====================
   {
-    name: "נסיעה 3",
-    start: "2027-01-10",
-    end: "2027-01-12",
+    name: "הגעה לארץ- רביד גבע ",
+    start: "2027-01-16",
+    end: "2027-01-25",
 
     participants: [
-      { name: "משתתף 1", visa: "אין" },
-      { name: "משתתף 2", visa: "אין" }
+      { name: "רביד גבע ")
+
     ],
 
     approvals: [
-      { role: "מפקד היחידה", status: "ממתין", date: "" },
-      { role: "מפקד מש\"ב", status: "ממתין", date: "" },
-      { role: "דבל\"א", status: "ממתין", date: "" },
-      { role: "יחב\"ם", status: "ממתין", date: "" },
-      { role: "קמנ\"ר", status: "ממתין", date: "" },
-      { role: "ראש אמ\"ן", status: "ממתין", date: "" },
-      { role: "תבל", status: "ממתין", date: "" },
-      { role: "יועכ\"ל", status: "ממתין", date: "" },
-      { role: "הזרמה במערכת", status: "ממתין", date: "" },
-      { role: "נספחות", status: "ממתין", date: "" },
+      { role: "מפקד היחידה", status: "יש", date: "" },
+      { role: "מפקד מש\"ב", status: "יש", date: "" },
+      { role: "דבל\"א", status: "יש", date: "" },
+      { role: "יחב\"ם", status: "יש", date: "" },
+      { role: "קמנ\"ר", status: "יש", date: "" },
+      { role: "ראש אמ\"ן", status: "יש", date: "" },
+      { role: "תבל", status: "יש", date: "" },
+      { role: "יועכ\"ל", status: "יש", date: "" },
+      { role: "הזרמה במערכת", status: "יש", date: "" },
+      { role: "נספחות", status: "יש", date: "" },
       { role: "משהב\"ט", status: "ממתין", date: "" }
     ],
 
     documents: [
-      { name: "פורמט מו\"ג", ready: "אין" },
-      { name: "נספח אבטחה", ready: "אין" },
-      { name: "טופס התראה", ready: "אין" },
-      { name: "מכתב הנמקה", ready: "אין" },
-      { name: "טופס תבל", ready: "אין" }
+      { name: "פורמט מו\"ג", ready: "יש" },
+      { name: "מכתב הנמקה", ready: "יש" },
+      { name: "טופס תבל", ready: "יש" }
     ]
   }
 ];
