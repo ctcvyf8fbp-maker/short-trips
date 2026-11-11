@@ -20,7 +20,7 @@ const SHEET_CSV_URL_PEOPLE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT
 // קישור להעלאת דרכונים (למשל Dropbox File Request). אם ריק – הכפתור לא מופיע.
 const PASSPORT_UPLOAD_LINK = "";
 
-const LAST_UPDATED = "2026-11-09";
+const LAST_UPDATED = "2026-11-11";
 
 const TRIPS = [
 
