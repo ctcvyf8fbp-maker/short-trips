@@ -11,7 +11,7 @@
 // קישור לגיליון Google Sheets שפורסם כ-CSV (File > Share > Publish to web).
 // אם יש כאן קישור – האתר קורא את הנתונים מהגיליון, ואין צורך לערוך את TRIPS שלמטה.
 // אם ריק – האתר משתמש ב-TRIPS שבקובץ הזה.
-const SHEET_CSV_URL = "";
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtPQgfg9nmlw4-UYy2u_19lQ1Kfy-kQTwnz9A2zGj_n8q5SkwNb5ZstY9ikJRNaURvNd4IC_DF-RgH/pub?gid=276988776&single=true&output=csv";
 
 // קישור להעלאת דרכונים (למשל Dropbox File Request). אם ריק – הכפתור לא מופיע.
 const PASSPORT_UPLOAD_LINK = "";
