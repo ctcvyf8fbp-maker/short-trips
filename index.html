@@ -204,8 +204,20 @@
     return `${when}, וחסרים עוד ${st.missing.join(" ו-")}`;
   }
 
+  // סדר הנסיעות: הקרובה ביותר ראשונה, נסיעות שהסתיימו בסוף
+  function tripOrder() {
+    const now = new Date(); const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const isPast = t => { const e = parse(t.end) || parse(t.start); return e ? e < today : false; };
+    return trips.map((t, i) => i).sort((a, b) => {
+      const A = trips[a], B = trips[b], pa = isPast(A), pb = isPast(B);
+      if (pa !== pb) return pa ? 1 : -1;
+      const sa = A.start || "9999", sb = B.start || "9999";
+      return pa ? sb.localeCompare(sa) : sa.localeCompare(sb);
+    });
+  }
+
   function showSummary() {
-    const order = trips.map((t, i) => i).sort((a, b) => (trips[a].start || "9").localeCompare(trips[b].start || "9"));
+    const order = tripOrder();
     document.getElementById("trip").innerHTML = `
       <h1 class="sum-title">כל הנסיעות</h1>
       <ul class="sum-list">
@@ -304,10 +316,10 @@
     const tabs = document.getElementById("tabs");
     tabs.hidden = false;
     tabs.innerHTML = `<button role="tab" data-i="-1">כל הנסיעות</button>` +
-      trips.map((t, i) => `<button role="tab" data-i="${i}">${stats(t).urgent ? "⚠ " : ""}${esc(t.name)}</button>`).join("");
+      tripOrder().map(i => { const t = trips[i]; return `<button role="tab" data-i="${i}">${stats(t).urgent ? "⚠ " : ""}${esc(t.name)}</button>`; }).join("");
     tabs.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; +b.dataset.i < 0 ? showSummary() : show(+b.dataset.i); });
     showSummary();
-  } else if (trips.length) show(0);
+  } else if (trips.length) show(tripOrder()[0]);
   else document.getElementById("trip").innerHTML = `<p class="empty">אין נסיעות עדיין. מוסיפים נסיעה בקובץ data.js.</p>`;
   }
 
