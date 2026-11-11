@@ -1,17 +1,21 @@
 // =====================================================================
 //  קובץ הנתונים – זה הקובץ היחיד שצריך לעדכן!
 //  סטטוס אישור: "אושר" / "ממתין" / "בטיפול" / "נדחה"
-//  ויזה ומסמכים: "יש" / "אין"
+//  ויזה, מקדמה, התחשבנות ומסמכים: "יש" / "אין"
 //  תאריך בפורמט: "2026-12-15" (שנה-חודש-יום), או "" אם אין
 //  בראשי תיבות כותבים \" במקום גרש כפול, למשל "קמנ\"ר"
 //  בכל רשימה: פסיק אחרי כל שורה, חוץ מהשורה האחרונה
 //  destination ו-notes לא חובה – אפשר להשאיר ""
 // =====================================================================
 
-// קישור לגיליון Google Sheets שפורסם כ-CSV (File > Share > Publish to web).
+// קישורים לגיליונות Google Sheets שפורסמו כ-CSV (קובץ > שיתוף > פרסום באינטרנט).
 // אם יש כאן קישור – האתר קורא את הנתונים מהגיליון, ואין צורך לערוך את TRIPS שלמטה.
-// אם ריק – האתר משתמש ב-TRIPS שבקובץ הזה.
+// SHEET_CSV_URL = הלשונית של נסיעות מש"ב
+// SHEET_CSV_URL_NASAH = הלשונית של נסיעות נס"ח
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtPQgfg9nmlw4-UYy2u_19lQ1Kfy-kQTwnz9A2zGj_n8q5SkwNb5ZstY9ikJRNaURvNd4IC_DF-RgH/pub?gid=276988776&single=true&output=csv";
+const SHEET_CSV_URL_NASAH = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtPQgfg9nmlw4-UYy2u_19lQ1Kfy-kQTwnz9A2zGj_n8q5SkwNb5ZstY9ikJRNaURvNd4IC_DF-RgH/pub?gid=1084406962&single=true&output=csv";
+// SHEET_CSV_URL_PEOPLE = הלשונית של המשתתפים (ויזה, מקדמה, התחשבנות)
+const SHEET_CSV_URL_PEOPLE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtPQgfg9nmlw4-UYy2u_19lQ1Kfy-kQTwnz9A2zGj_n8q5SkwNb5ZstY9ikJRNaURvNd4IC_DF-RgH/pub?gid=921306285&single=true&output=csv";
 
 // קישור להעלאת דרכונים (למשל Dropbox File Request). אם ריק – הכפתור לא מופיע.
 const PASSPORT_UPLOAD_LINK = "";
@@ -22,6 +26,7 @@ const TRIPS = [
 
   // ===================== נסיעה 1 =====================
   {
+    type: "מש\"ב",
     name: "אינקה פירוק",
     start: "2026-12-13",
     end: "2026-12-18",
@@ -29,11 +34,11 @@ const TRIPS = [
     notes: "",                  // הערות חופשיות, למשל מה תקוע (לא חובה)
 
     participants: [
-      { name: "לי יפרח", visa: "אין" },
-      { name: "יונתן עקירב", visa: "אין" },
-      { name: "שקד סבו", visa: "אין" },
-      { name: "עידן פניגר", visa: "אין" },
-      { name: "שירן מנחימוב", visa: "אין" }
+      { name: "לי יפרח", visa: "אין", advance: "אין", settlement: "אין" },
+      { name: "יונתן עקירב", visa: "אין", advance: "אין", settlement: "אין" },
+      { name: "שקד סבו", visa: "אין", advance: "אין", settlement: "אין" },
+      { name: "עידן פניגר", visa: "אין", advance: "אין", settlement: "אין" },
+      { name: "שירן מנחימוב", visa: "אין", advance: "אין", settlement: "אין" }
     ],
 
     approvals: [
@@ -61,6 +66,7 @@ const TRIPS = [
 
   // ===================== נסיעה 2 =====================
   {
+    type: "מש\"ב",
     name: "אלגוריתמיקה",
     start: "2027-01-31",
     end: "2027-02-05",
@@ -68,9 +74,9 @@ const TRIPS = [
     notes: "",
 
     participants: [
-      { name: "ליאור בק", visa: "יש" },
-      { name: "גל כהן", visa: "יש" },
-      { name: "ערבה אריכא", visa: "יש" }
+      { name: "ליאור בק", visa: "יש", advance: "אין", settlement: "אין" },
+      { name: "גל כהן", visa: "יש", advance: "אין", settlement: "אין" },
+      { name: "ערבה אריכא", visa: "יש", advance: "אין", settlement: "אין" }
     ],
 
     approvals: [
@@ -98,6 +104,7 @@ const TRIPS = [
 
   // ===================== נסיעה 3 =====================
   {
+    type: "מש\"ב",
     name: "הגעה לארץ – רביד גבע",
     start: "2027-01-16",
     end: "2027-01-25",
@@ -105,7 +112,7 @@ const TRIPS = [
     notes: "",
 
     participants: [
-      { name: "רביד גבע", visa: "אין" }
+      { name: "רביד גבע", visa: "אין", advance: "אין", settlement: "אין" }
     ],
 
     approvals: [
