@@ -132,6 +132,13 @@
     .plane svg { width: 19px; height: 19px; }
   }
 
+  .share { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--soft); padding-top: 14px; }
+  .share button { border: 1px solid var(--main); background: var(--card); color: var(--main); font-weight: 700; padding: 7px 16px; border-radius: 10px; cursor: pointer; font-size: .9rem; }
+  .share small { color: var(--muted); }
+  .share .done { color: var(--main); font-weight: 700; }
+  .single .card-main { cursor: default; }
+  .single .more-hint, .single .share { display: none; }
+
   details.past { margin-top: 4px; }
   details.past summary { cursor: pointer; color: var(--muted); font-weight: 600; padding: 6px 2px; list-style: none; }
   details.past summary::-webkit-details-marker { display: none; }
@@ -301,6 +308,7 @@
             ${stepsList(i)}
           </div>
           ${t.notes ? `<div class="wide"><h4>הערות</h4><div class="notes">${esc(t.notes)}</div></div>` : ""}
+          <div class="share"><button data-share="${k}">העתקת קישור לנסיעה הזאת</button><small id="share-${k}">מי שיקבל את הקישור יראה רק את הנסיעה הזאת</small></div>
         </div>
       </article>`;
   }
@@ -309,6 +317,17 @@
     const app = document.getElementById("app");
     if (loadProblem) {
       app.innerHTML = `<div class="problem"><h2>האתר לא הצליח לקרוא את הנתונים</h2><p>${esc(loadProblem)}</p></div>`;
+      return;
+    }
+    const only = new URLSearchParams(location.search).get("t");
+    if (only !== null) {
+      const k = trips.findIndex(t => t.name === only);
+      document.getElementById("filter").hidden = true;
+      document.querySelector("header.page h1").textContent = k >= 0 ? "פרטי נסיעה" : "הנסיעה לא נמצאה";
+      if (k < 0) { app.innerHTML = `<div class="problem"><h2>לא מצאתי נסיעה בשם הזה</h2><p>ייתכן שהשם של הנסיעה השתנה. כדאי לבקש קישור חדש.</p></div>`; return; }
+      opened.add(k);
+      app.innerHTML = `<div class="single" style="margin-top:22px">${cardHtml(trips[k], k)}</div>`;
+      document.title = trips[k].name;
       return;
     }
     const byType = TYPES.map(type => ({ type, list: trips.map((t, k) => [t, k]).filter(([t]) => (t.type || TYPES[0]) === type) }));
@@ -339,6 +358,17 @@
       document.getElementById(`label-${k}`).textContent = stop.getAttribute("aria-label");
       return;
     }
+    const sh = e.target.closest("[data-share]");
+    if (sh) {
+      const k = +sh.dataset.share;
+      const url = location.origin + location.pathname + "?t=" + encodeURIComponent(trips[k].name);
+      const note = document.getElementById(`share-${k}`);
+      const ok = () => { note.textContent = "הקישור הועתק. אפשר להדביק אותו בוואטסאפ או במייל."; note.className = "done"; };
+      if (navigator.clipboard) navigator.clipboard.writeText(url).then(ok, () => window.prompt("העתיקו את הקישור:", url));
+      else window.prompt("העתיקו את הקישור:", url);
+      return;
+    }
+    if (new URLSearchParams(location.search).get("t") !== null) return;
     const tg = e.target.closest("[data-toggle]");
     if (tg) { const k = +tg.dataset.toggle; opened.has(k) ? opened.delete(k) : opened.add(k); render(); }
   });
