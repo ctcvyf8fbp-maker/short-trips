@@ -28,6 +28,7 @@
     }
   }
   *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   html { scroll-padding-top: env(safe-area-inset-top, 0px); }
   body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.5 "Assistant", "Segoe UI", Arial, sans-serif; }
   button { font: inherit; color: inherit; }
@@ -330,9 +331,12 @@
       document.title = trips[k].name;
       return;
     }
+    const GROUP_LINKS = { mashab: TYPES[0], nasah: TYPES[1] };
+    const lockedType = GROUP_LINKS[new URLSearchParams(location.search).get("g")];
+    if (lockedType) { filter = lockedType; document.querySelector("header.page h1").textContent = `נסיעות ${lockedType}`; }
     const byType = TYPES.map(type => ({ type, list: trips.map((t, k) => [t, k]).filter(([t]) => (t.type || TYPES[0]) === type) }));
     const f = document.getElementById("filter");
-    f.hidden = false;
+    f.hidden = !!lockedType;
     f.innerHTML = [`<button aria-pressed="${filter === "הכול"}" data-filter="הכול">הכול</button>`]
       .concat(byType.map(g => `<button aria-pressed="${filter === g.type}" data-filter="${esc(g.type)}">${esc(g.type)} ${g.list.length}</button>`)).join("");
 
@@ -343,7 +347,7 @@
         : `<div class="empty">${PLANE}אין כרגע נסיעות ${esc(g.type)}</div>`;
       const pastHtml = past.length ? `<details class="past"><summary>${past.length === 1 ? "נסיעה אחת שהסתיימה" : `${past.length} נסיעות שהסתיימו`}</summary>${past.map(([t, k]) => cardHtml(t, k)).join("")}</details>` : "";
       return `<section class="group"><div class="group-head"><h2>${esc(g.type)}</h2><span class="count">${active.length} ${active.length === 1 ? "נסיעה" : "נסיעות"}</span></div>${body}${pastHtml}</section>`;
-    }).join("") + (unassigned.length ? `<p class="unassigned">⚠ בלשונית המשתתפים יש שמות של נסיעות שלא נמצאו: ${unassigned.map(esc).join(", ")}. כדאי לבדוק שהשם כתוב בדיוק כמו בלשונית הנסיעות.</p>` : "");
+    }).join("") + (unassigned.length && !lockedType ? `<p class="unassigned">⚠ בלשונית המשתתפים יש שמות של נסיעות שלא נמצאו: ${unassigned.map(esc).join(", ")}. כדאי לבדוק שהשם כתוב בדיוק כמו בלשונית הנסיעות.</p>` : "");
   }
 
   document.addEventListener("click", e => {
