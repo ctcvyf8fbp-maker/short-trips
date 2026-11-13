@@ -73,7 +73,6 @@
   details.fold > .in { padding: 0 16px 16px; }
 
   /* מסמך לקריאה */
-  .paper { background: #fff; color: #1b1b1b; border: 1px solid var(--line); border-radius: 10px; padding: 22px 24px; font-size: .97rem; max-height: 70vh; overflow-y: auto; }
   .paper h4 { text-align: center; margin: 4px 0 14px; font-size: 1.1rem; text-decoration: underline; }
   .paper ol { padding-inline-start: 22px; margin: 12px 0; }
   .paper li { margin-bottom: 8px; }
@@ -115,20 +114,68 @@
     .exp .del { justify-self: end; }
   }
 
-  /* הדפסה */
-  #print { display: none; }
+  /* טופס בפורמט המקורי */
+  .hint { color: var(--muted); font-size: .92rem; margin: 0 0 12px; }
+  .paper-scroll { overflow-x: auto; margin: 0 -4px 14px; padding: 4px; }
+  .paper { background: #fff; color: #111; width: 100%; max-width: 820px; min-width: 640px; margin: 0 auto 16px; padding: 34px 40px; border-radius: 6px;
+           box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 8px 24px rgba(0,0,0,.08); font: 16px/1.85 "Arial", "Assistant", sans-serif; }
+  .paper h4 { text-align: center; text-decoration: underline; font-size: 19px; margin: 6px 0 16px; }
+  .paper p { margin: 0 0 8px; }
+  .paper .para { text-indent: 0; margin-bottom: 10px; }
+  .paper .fl { line-height: 2.3; }
+  .paper .opt label { margin-inline-start: 14px; white-space: nowrap; }
+  .paper .opt input { accent-color: #0F6B5C; width: 16px; height: 16px; vertical-align: -2px; }
+  input.ln { border: 0; border-bottom: 1px solid #333; background: #F3F8F6; color: #0b2a6b; font: inherit; padding: 0 6px; height: 26px; border-radius: 2px 2px 0 0; vertical-align: baseline; }
+  input.ln:focus { outline: 2px solid #0F6B5C; background: #E2F2EE; }
+  input.ln.w1 { width: 90px; } input.ln.w2 { width: 140px; } input.ln.w3 { width: 190px; }
+  .sign-row { display: flex; gap: 28px; margin-top: 30px; align-items: flex-end; }
+  .sign-row > div { flex: 1; display: flex; flex-direction: column; gap: 4px; text-align: center; font-size: 14px; }
+  .sign-row input.ln { width: 100%; text-align: center; }
+  .sign-row.two { max-width: 560px; }
+  .sig-wrap { position: relative; display: inline-block; vertical-align: bottom; }
+  canvas.sig { width: 220px; height: 64px; border-bottom: 1px solid #333; background: #F3F8F6; touch-action: none; cursor: crosshair; display: block; }
+  .sign-row canvas.sig { width: 100%; }
+  .sig-wrap { width: 220px; } .sign-row .sig-wrap { width: 100%; }
+  .sig-clear { position: absolute; top: 2px; left: 2px; font-size: 11px; border: 0; background: rgba(255,255,255,.85); color: #555; border-radius: 6px; padding: 1px 6px; cursor: pointer; }
+  .tbl-wrap { overflow-x: auto; }
+  .tbl { width: 100%; border-collapse: collapse; font-size: 14px; margin: 8px 0 14px; }
+  .tbl th { border: 1px solid #333; padding: 6px; background: #fff; font-weight: 700; }
+  .tbl td { border: 1px solid #333; padding: 3px 4px; vertical-align: middle; text-align: center; }
+  .tbl td.type { width: 17%; text-align: start; font-weight: 600; vertical-align: top; padding: 6px; }
+  .tbl td.note { width: 34%; text-align: start; font-size: 12.5px; line-height: 1.45; vertical-align: top; padding: 6px; }
+  .tbl td.m { width: 6%; } .tbl td.m input { width: 17px; height: 17px; accent-color: #0F6B5C; }
+  .tbl input.cell { width: 100%; min-width: 0; border: 0; background: #F3F8F6; color: #0b2a6b; font: inherit; padding: 4px; text-align: center; }
+  .tbl tbody[data-group="food"] td.type, .tbl tbody[data-group="taxiIL"] td.type, .tbl tbody[data-group="taxiAbroad"] td.type { background: #f4f4f4; }
+  .add-line { display: block; margin-top: 6px; border: 1px dashed #0F6B5C; color: #0F6B5C; background: #fff; border-radius: 6px; font-size: 12px; padding: 2px 8px; cursor: pointer; }
+  .decl-title { text-align: center; margin-top: 4px; }
+  .actions-box { background: var(--card); border-radius: 16px; box-shadow: var(--shadow); padding: 16px 20px; }
+  .actions-box .check { margin-top: 0; }
+
+  /* הדפסה ושמירה כ-PDF: רק הטופס, בפורמט המקורי */
+  @page { size: A4; margin: 12mm; }
   @media print {
-    body { background: #fff; color: #000; font-size: 12pt; }
-    .wrap { display: none; }
-    #print { display: block; padding: 0 8mm; }
-    #print h1 { text-align: center; font-size: 15pt; text-decoration: underline; margin: 0 0 10pt; }
-    #print table { width: 100%; border-collapse: collapse; margin: 6pt 0 10pt; }
-    #print td { border: 1px solid #999; padding: 4pt 6pt; vertical-align: top; }
-    #print td.k { width: 26%; font-weight: 700; background: #f2f2f2; }
-    #print ol { padding-inline-start: 18pt; } #print li { margin-bottom: 4pt; }
-    #print .sig { display: flex; justify-content: space-between; gap: 20pt; margin-top: 18pt; }
-    #print .sig div { flex: 1; border-top: 1px solid #000; padding-top: 3pt; text-align: center; font-size: 10pt; }
-    #print .sig b { display: block; font-size: 12pt; margin-bottom: 14pt; }
+    body { background: #fff !important; }
+    .site-head, .back, .doc-head, .no-print, .actions-box { display: none !important; }
+    .wrap { max-width: none; padding: 0; }
+    .paper-scroll { overflow: visible; margin: 0; padding: 0; }
+    .paper { box-shadow: none; max-width: none; min-width: 0; width: 100%; padding: 0; margin: 0; border-radius: 0; }
+    .paper + .paper { break-before: page; }
+    input.ln, .tbl input.cell, canvas.sig { background: transparent !important; }
+    input[type="date"]:invalid, input[type="time"]:invalid { color: transparent; }
+    input::-webkit-calendar-picker-indicator { display: none; }
+    .sig-clear { display: none !important; }
+    .tbl tr { break-inside: avoid; }
+    .paper { font-size: 11pt; line-height: 1.5; }
+    .paper h4 { font-size: 13.5pt; margin: 2pt 0 8pt; }
+    .paper .fl { line-height: 1.95; }
+    .paper p { margin-bottom: 4pt; }
+    .paper .para { margin-bottom: 5pt; }
+    input.ln { height: 19px; }
+    .sign-row { margin-top: 14pt; }
+    canvas.sig { height: 52px; }
+    .tbl { font-size: 9.5pt; margin: 4pt 0 6pt; }
+    .tbl td.note { font-size: 8.5pt; line-height: 1.3; }
+    .tbl td { padding: 2px 3px; }
   }
 </style>
 </head>
@@ -141,7 +188,6 @@
   <main id="app"></main>
   <datalist id="countries"></datalist>
 </div>
-<div id="print" aria-hidden="true"></div>
 
 <script>
   // ---------- רשימת המסמכים במאגר ----------
@@ -224,207 +270,218 @@
       <div class="calc-line"><span>קצובת לינה: עד ${n(r[4])} ${r[3]} ללילה × ${nights} ${nights === 1 ? "לילה" : "לילות"}</span><b>עד ${n(r[4] * nights)} ${r[3]}</b></div>`;
   }
 
-  // ---------- שדות פרטי הנוסע (משותפים לשני הטפסים) ----------
-  function travelerFields() {
-    return `<div class="form-grid">
-      <label class="field">שם הנוסע/ת<input data-f="name" autocomplete="name"></label>
-      <label class="field">מספר תעודת זהות<input data-f="id" inputmode="numeric"></label>
-      <label class="field">דרגה / תפקיד<input data-f="rank"></label>
-      <label class="field">מס' נייד<input data-f="phone" inputmode="tel" autocomplete="tel"></label>
-      <label class="field">כתובת מייל<input data-f="email" type="email" autocomplete="email"></label>
-      <label class="field">יעד<input data-f="dest"></label>
-      <label class="field">תאריך יציאה מהארץ<input type="date" data-f="out"></label>
-      <label class="field">שעת המראה<input type="time" data-f="outTime"></label>
-      <label class="field">תאריך חזרה לארץ<input type="date" data-f="back"></label>
-      <label class="field">שעת נחיתה<input type="time" data-f="backTime"></label>
-    </div>`;
-  }
+  // =====================================================================
+  //  טפסים בפורמט המקורי – ממלאים ישירות על המסמך
+  // =====================================================================
+  const inp = (name, cls = "", type = "text", extra = "") =>
+    `<input class="ln ${cls}" data-f="${name}" type="${type}" ${type === "date" || type === "time" ? "required" : ""} ${extra} aria-label="${name}">`;
   const val = (box, n) => { const el = box.querySelector(`[data-f="${n}"]`); return el ? (el.value || "").trim() : ""; };
   const checked = (box, n) => { const el = box.querySelector(`[data-f="${n}"]`); return !!(el && el.checked); };
-  function travelerLines(box) {
-    const v = n => val(box, n);
-    return [
-      `שם: ${v("name")} | ת"ז: ${v("id")}`,
-      v("rank") ? `דרגה/תפקיד: ${v("rank")}` : "",
-      v("phone") || v("email") ? `נייד: ${v("phone")}${v("email") ? ` | מייל: ${v("email")}` : ""}` : "",
-      v("dest") ? `יעד: ${v("dest")}` : "",
-      v("out") ? `יציאה: ${fmt(v("out"))} ${v("outTime")}`.trim() : "",
-      v("back") ? `חזרה: ${fmt(v("back"))} ${v("backTime")}`.trim() : ""
-    ].filter(Boolean);
-  }
+  const todayIso = () => { const t = today(); return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`; };
   function openWhatsApp(text) { window.open(`https://wa.me/${waNumber()}?text=${encodeURIComponent(text)}`, "_blank", "noopener"); }
   function say(box, text, ok) { const m = box.querySelector("[data-msg]"); m.className = "msg " + (ok ? "ok" : "bad"); m.textContent = text; }
 
+  // שורת פרטי הנוסע כמו בטופס המקורי (משותפת למקדמה ולהתחשבנות)
+  function travelerBlock(extraLine = "") {
+    return `
+      <p class="fl">שם הנוסע/ת: ${inp("name", "w3", "text", 'autocomplete="name"')} מספר תעודת זהות: ${inp("id", "w2", "text", 'inputmode="numeric"')} יעד: ${inp("dest", "w2")}</p>
+      <p class="fl">תאריך יציאה מהארץ: ${inp("out", "w2", "date")} שעת המראה: ${inp("outTime", "w1", "time")} תאריך חזרה לארץ: ${inp("back", "w2", "date")} שעת נחיתה: ${inp("backTime", "w1", "time")}</p>
+      <p class="fl">דרגה / תפקיד: ${inp("rank", "w2")} מס' נייד: ${inp("phone", "w2", "tel", 'inputmode="tel"')} כתובת מייל: ${inp("email", "w3", "email")}</p>
+      ${extraLine}`;
+  }
+  function travelerLines(box) {
+    const v = n => val(box, n);
+    return [`שם: ${v("name")} | ת"ז: ${v("id")}`, v("rank") ? `דרגה/תפקיד: ${v("rank")}` : "",
+      v("phone") || v("email") ? `נייד: ${v("phone")}${v("email") ? ` | מייל: ${v("email")}` : ""}` : "",
+      v("dest") ? `יעד: ${v("dest")}` : "", v("out") ? `יציאה: ${fmt(v("out"))} ${v("outTime")}`.trim() : "",
+      v("back") ? `חזרה: ${fmt(v("back"))} ${v("backTime")}`.trim() : ""].filter(Boolean);
+  }
+
+  // ---------- חתימה ----------
+  function sigPad(name) {
+    return `<span class="sig-wrap"><canvas class="sig" data-sig="${name}" aria-label="חתימה – ציור באצבע או בעכבר"></canvas><button type="button" class="sig-clear no-print" data-sig-clear="${name}">ניקוי</button></span>`;
+  }
+  function setupSigs(root) {
+    root.querySelectorAll("canvas.sig").forEach(c => {
+      const ratio = window.devicePixelRatio || 1, r = c.getBoundingClientRect();
+      c.width = r.width * ratio; c.height = r.height * ratio;
+      const ctx = c.getContext("2d"); ctx.scale(ratio, ratio); ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.strokeStyle = "#1a2a6c";
+      let drawing = false;
+      const pos = e => { const b = c.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
+      c.addEventListener("pointerdown", e => { drawing = true; c.setPointerCapture(e.pointerId); ctx.beginPath(); ctx.moveTo(...pos(e)); });
+      c.addEventListener("pointermove", e => { if (!drawing) return; ctx.lineTo(...pos(e)); ctx.stroke(); c.dataset.signed = "1"; });
+      ["pointerup", "pointercancel", "pointerleave"].forEach(ev => c.addEventListener(ev, () => drawing = false));
+    });
+  }
+  const signed = (box, n) => { const c = box.querySelector(`[data-sig="${n}"]`); return !!(c && c.dataset.signed); };
+
   // ---------- מקדמה ----------
   const ADV_TITLE = "מקדמה מזומן / הקצאה בכרטיס אשראי עבור נסיעה בתפקיד";
-  const ADV_REQUEST = 'אבקש ממשרד הביטחון להעביר לי הרשאה למשיכת מזומן/כרטיס אשראי עבור שהותי בתפקיד בחו"ל עפ"י הקצובה שנקבעה ע"י החשכ"ל.';
+  const ADV_CASH = "מזומן לבנק הפועלים בדיוטי פרי";
   const ADV_TERMS = [
-    'אני מתחייב/ת להתחשבן בצירוף קבלות ע"י סריקה באפליקציית כאל בהתאם להנחיות שהועברו למתן כרטיס אשראי, או במקרים חריגים של מזומן ע"י סריקה למייל חט\' נסיעות חו"ל.',
-    "אני מתחייב/ת להצהיר על ארוחות רשמיות שהוזמנתי בעת ההתחשבנות בגמר הנסיעה.",
-    'אני מתחייב/ת לבצע התחשבנות עד 30 יום מתאריך הגעתי ארצה, אחרת ההתחשבנות תתבצע חד צדדית ע"י חטיבת חשבונות חו"ל/אגף הכספים משהב"ט.',
-    'ידוע לי שיתרת חובה לגבייה תתבצע ע"י חיוב כרטיס האשראי האישי בשקלים, בהתאם לשער המטבע היציג ביום הנסיעה, ויתרה לזכותי תועבר לחשבון הבנק אשר בבעלותי. מצ"ב צילום כרטיס האשראי האישי משני צדדיו.',
-    "ידוע לי שאני אחראי/ת באופן אישי לכסף אשר בחרתי לקחת במזומן, ושאין ביטוח על מזומנים שקיבלתי ולא אפוצה על אובדן או גניבה. עליי חלה אחריות אישית לשמירתם.",
-    'אני מתחייב/ת, במידה והנסיעה תבוטל לאחר קבלת המקדמה, להחזיר את המקדמה במלואה במיידי/להעביר בקשה לביטול הקצאת האשראי, אחרת ייגבה מכרטיס האשראי האישי שלי בהתאם לשער המטבע היציג ביום הנסיעה. היה ולא ניתן יהיה לגבות באמצעות כרטיס האשראי, אני מאשר/ת כי סכום החוב יקוזז ממשכורת משרד הביטחון/צה"ל, ואני ממחה את זכויותיי במשכורתי בגובה החוב לטובת משרד הביטחון.',
-    'אני מתחייב/ת שלא לקבל כל הטבות/העדפות/פיצוי בטיסה ושום זכויות הנובעות ו/או העשויות לנבוע מנסיעה זו, כולל "הנוסע המתמיד" של חברת אל על או של כל חברה אחרת, וכל זיכוי כספי או שווה ערך כספי שיינתן לי ע"י חברת התעופה מכל סיבה שהיא, ואף לא בגלל שינוי מסלול או דחיית טיסה או כל סיבה אחרת מרצון או מאילוץ. כל זכות כזו אני ממחה למשהב"ט לכל שימוש שימצא לנכון.'
+    'אני מתחייב/ת להתחשבן בצירוף קבלות ע"י סריקה באפליקציית כאל בהתאם להנחיות שהועברו למתן כרטיס אשראי או במקרים חריגים של מזומן ע"י סריקה למייל חט\' נסיעות חו"ל.',
+    "אני מתחייב להצהיר על ארוחות רשמיות שהוזמנתי בעת ההתחשבנות בגמר הנסיעה.",
+    'אני מתחייב לבצע התחשבנות עד 30 יום מתאריך הגעתי ארצה, אחרת ההתחשבנות תתבצע חד צדדית ע"י חטיבת חשבונות חו"ל/אגף הכספים משהב"ט.',
+    'ידוע לי שיתרת חובה לגביה תתבצע ע"י חיוב כרטיס האשראי האישי בשקלים, בהתאם לשער המטבע היציג ביום הנסיעה, ויתרה לזכותי תועבר לחשבון הבנק אשר בבעלותי. מצ"ב צילום כרטיס האשראי אישי משני צדדיו.',
+    "ידוע לי שאני אחראי/ת באופן אישי לכסף אשר בחרתי לקחת במזומן ושאין ביטוח על מזומנים שקיבלתי ולא אפוצה על אובדן או גניבה. עלי חלה אחריות אישית לשמירתם.",
+    'אני מתחייב/ת במידה והנסיעה תבוטל לאחר קבלת המקדמה להחזיר את המקדמה במלואה במיידי/להעביר בקשה לביטול הקצאת האשראי, אחרת ייגבה מכרטיס האשראי האישי שלי בהתאם לשער המטבע היציג ביום הנסיעה. היה ולא ניתן יהיה לגבות באמצעות כרטיס האשראי, אני מאשר כי סכום החוב יקוזז ממשכורת משרד הביטחון/צה"ל, ואני ממחה את זכויותיי במשכורתי בגובה החוב, לטובת משרד הביטחון.',
+    'אני מתחייב/ת שלא לקבל כל הטבות/העדפות/פיצוי בטיסה ושום זכויות הנובעות ו/או העשויות לנבוע מנסיעה זו כולל "הנוסע המתמיד" של חברת אל על או של כל חברה אחרת, וכל זיכוי כספי או שווה ערך כספי, שיינתן לי ע"י חברת התעופה מכל סיבה שהיא ואף לא בגלל שינוי מסלול או דחיית טיסה או כל סיבה אחרת מרצון או אילוץ. כל זכות כזו אני ממחה למשהב"ט לכל שימוש שימצא לנכון.'
   ];
   const ADV_VACATION = [
-    "ידוע לי שאם אצא לחופשה פרטית במסגרת נסיעה זו, לא תאושר לי שום עלות בתקופת החופשה, בכלל זה הלינה וההוצאות הנלוות ביום הראשון/האחרון של מילוי התפקיד, אלא דמי שהייה בלבד בהתאם לימי התפקיד.",
-    'ידוע לי שככלל, כל חופשה בטרם או לאחר מילוי תפקיד עשויה לגרום לשינויים בזכאותי, ומשהב"ט לא יישא באחריות ובתשלומים בגין כל הוצאה שנגרמה בגין לקיחת חופשה, כגון: בתי מלון, השכרת רכב, מוניות, שינויים/ביטולים של טיסות ועוד. באחריותי ועל חשבוני לבצע השלמה לתקופת החופשה של ביטוח רפואי ומטען. ידוע לי שקיימת אפשרות לבצע השלמה זו ישירות מול פספורטכארד.',
-    "במידה והנסיעה תבוטל, או ישונו היעדים, אני מתחייב/ת לשאת בכל הוצאות הנסיעה הקשורות לחופשה."
+    "ידוע לי שאם אצא לחופשה פרטית במסגרת נסיעה זו לא תאושר לי שום עלות בתקופת החופשה, בכלל זה הלינה והוצאות נלוות ביום הראשון/האחרון של מילוי התפקיד, אלא דמי שהייה בלבד בהתאם לימי התפקיד.",
+    'ידוע לי שככלל, כל חופשה בטרם או לאחר מילוי תפקיד עשויה לגרום שינויים בזכאותי ומשהב"ט לא יישא באחריות ובתשלומים בגין כל הוצאה שנגרמה בגין לקיחת חופשה, כגון: בתי מלון, השכרת רכב, מוניות שינויים/ביטולים של טיסות ועוד. באחריותי ועל חשבוני לבצע השלמה לתקופת החופשה של ביטוח רפואי ומטען. ידוע לי שקיימת אפשרות לבצע השלמה זו ישירות מול פספורטקארד.',
+    "במידה והנסיעה תבוטל, או ישונו היעדים, אני מתחייב/ת לשאת בכל הוצאות הנסיעה הקשורים לחופשה."
   ];
-  const ADV_DECL = "אני מצהיר/ה בזאת כי קראתי ואני מאשר/ת את תוכן מסמך זה.";
-  const ADV_POA = "אני מייפה את כוחו/ה לקחת בשמי ובמקומי את שובר המקדמה לבנק ולמשוך עבורי את הכסף מהבנק. בזאת, אני לוקח/ת את האחריות על השובר והכסף ולא תהיה לי כל טענה למשרד הביטחון בעניין.";
+  const ADV_DECL = "אני מצהיר/ה בזאת כי קראתי ואני מאשר את תוכן מסמך זה.";
 
   function advanceHtml() {
     return `
-      <div class="callout warn"><b>יש לצרף לטופס:</b><ul><li>צילום כרטיס האשראי האישי משני הצדדים</li><li>טופס ניהול חשבון</li></ul></div>
-      <details class="fold"><summary>1. קריאת הטופס לפני המילוי</summary><div class="in">
-        <div class="paper">
-          <p>אל: משרד הביטחון – אגף הכספים</p>
-          <h4>${esc(ADV_TITLE)}</h4>
-          <p>שם הנוסע/ת, מספר תעודת זהות, יעד, תאריך יציאה מהארץ, שעת המראה, תאריך חזרה לארץ, שעת נחיתה, דרגה/תפקיד, מס' נייד, כתובת מייל.</p>
-          <p>${esc(ADV_REQUEST)}</p>
-          <ol>${ADV_TERMS.map(t => `<li>${esc(t)}</li>`).join("")}</ol>
-          <p class="sub">חופשה פרטית במסגרת הנסיעה</p>
-          <ol start="${ADV_TERMS.length + 1}">${ADV_VACATION.map(t => `<li>${esc(t)}</li>`).join("")}</ol>
-          <p><b>${esc(ADV_DECL)}</b></p>
-          <p>תאריך, שם פרטי ומשפחה, חתימה.</p>
-          <p class="sub">ייפוי כוח (במידה והכסף נמשך עבורי באמצעות אדם אחר)</p>
-          <p>אני (שם ות"ז) מייפה את כוחו של (שם ות"ז) ${esc(ADV_POA.replace("אני מייפה את כוחו/ה ", ""))}</p>
-          <p>חתימת הנוסע/ת, חתימת המיופה/ה.</p>
-        </div>
-      </div></details>
-      <details class="fold" open><summary>2. מילוי מקוון</summary><div class="in" data-form="advance">
-        ${travelerFields()}
-        <p class="section-title">סוג המקדמה</p>
-        <div class="choice">
+      <div class="callout bad no-print"><b>לבקשת מקדמה חובה לצרף כרטיס טיסה.</b> בלי כרטיס טיסה הבקשה לא תטופל.</div>
+      <div class="callout warn no-print"><b>מצרפים לטופס:</b><ul><li>כרטיס טיסה</li><li>צילום כרטיס האשראי האישי משני צדדיו</li><li>טופס ניהול חשבון</li></ul></div>
+      <p class="hint no-print">ממלאים ישירות על הטופס, וחותמים באצבע או בעכבר בתיבת החתימה. בסוף שומרים כ-PDF ושולחים.</p>
+      <div class="paper-scroll"><div data-form="advance">
+      <article class="paper">
+        <p class="fl">תאריך: ${inp("date", "w2", "date", `value="${todayIso()}"`)}</p>
+        <p class="fl"><u>אל: משרד הביטחון - אגף הכספים</u></p>
+        <h4>${esc(ADV_TITLE)}</h4>
+        ${travelerBlock()}
+        <p>אבקש ממשרד הביטחון להעביר לי הרשאה למשיכת מזומן/כרטיס אשראי עבור שהותי בתפקיד בחו"ל עפ"י הקצובה שנקבעה ע"י החשכ"ל.</p>
+        <p class="fl opt"><b>אופן קבלת המקדמה:</b>
           <label><input type="radio" name="advType" value="הקצאה בכרטיס אשראי" checked> הקצאה בכרטיס אשראי</label>
-          <label><input type="radio" name="advType" value="מזומן"> מזומן</label>
+          <label><input type="radio" name="advType" value="${ADV_CASH}"> ${ADV_CASH}</label></p>
+        ${ADV_TERMS.map(t => `<p class="para">${esc(t)}</p>`).join("")}
+      </article>
+      <article class="paper page2">
+        ${ADV_VACATION.map(t => `<p class="para">${esc(t)}</p>`).join("")}
+        <p class="para"><b>${esc(ADV_DECL)}</b></p>
+        <div class="sign-row">
+          <div>${inp("signDate", "", "date", `value="${todayIso()}"`)}<span>תאריך</span></div>
+          <div>${inp("signName", "", "text")}<span>שם פרטי + משפחה</span></div>
+          <div>${sigPad("main")}<span>חתימה</span></div>
         </div>
-        <p class="section-title">חופשה פרטית במסגרת הנסיעה</p>
-        <div class="choice">
-          <label><input type="radio" name="vac" value="לא" checked> לא</label>
-          <label><input type="radio" name="vac" value="כן"> כן</label>
+        <p class="fl" style="margin-top:22px"><b>מצ"ב טופס ניהול חשבון</b></p>
+        <p class="fl"><b><u>ייפוי כוח</u></b> <u>(במידה והכסף נמשך עבורי באמצעות אדם אחר):</u></p>
+        <p class="fl">אני (ת.ז) ${inp("poaMyId", "w2")} (שם פרטי + משפחה) ${inp("poaMyName", "w3")} מייפה את כוחו של
+          (שם פרטי + משפחה) ${inp("poaName", "w3")} (ת.ז) ${inp("poaId", "w2")} לקחת בשמי ובמקומי את שובר המקדמה לבנק ולמשוך עבורי את הכסף מהבנק.</p>
+        <p>בזאת, אני לוקח את האחריות על השובר והכסף ולא תהיה לי כל טענה למשרד הביטחון בעניין.</p>
+        <div class="sign-row two">
+          <div>${sigPad("poaTraveler")}<span>חתימת הנוסע</span></div>
+          <div>${sigPad("poaAgent")}<span>חתימת המיופה</span></div>
         </div>
-        <div class="form-grid" data-vac hidden style="margin-top:10px">
-          <label class="field">חופשה מתאריך<input type="date" data-f="vacFrom"></label>
-          <label class="field">עד תאריך<input type="date" data-f="vacTo"></label>
-        </div>
-        <label class="check"><input type="checkbox" data-f="poa"><span>הכסף יימשך עבורי באמצעות אדם אחר (ייפוי כוח)</span></label>
-        <div class="poa form-grid" data-poa hidden>
-          <label class="field">שם המיופה/ה<input data-f="poaName"></label>
-          <label class="field">ת"ז המיופה/ה<input data-f="poaId" inputmode="numeric"></label>
-        </div>
-        <label class="check"><input type="checkbox" data-f="decl"><span>קראתי את כל סעיפי הטופס, כולל ההתחייבויות וסעיפי החופשה. ${esc(ADV_DECL)}</span></label>
+      </article>
+      </div></div>
+      <div class="actions-box no-print" data-actions="advance">
+        <label class="check"><input type="checkbox" data-a="ticket"><span>יש לי כרטיס טיסה ואצרף אותו לבקשה</span></label>
         <div class="row-btns">
+          <button class="btn primary" data-print="advance">שמירה כ-PDF / הדפסה</button>
           <button class="btn wa" data-send="advance">שליחה בוואטסאפ</button>
-          <button class="btn quiet" data-print="advance">הדפסה / שמירה כ-PDF</button>
           <span data-msg></span>
         </div>
-        <p class="fine">הטופס לא נשמר באתר. אחרי השליחה מצרפים בצ'אט את צילום כרטיס האשראי ואת טופס ניהול החשבון. אם נדרש טופס חתום, מדפיסים את הטופס הממולא, חותמים ושולחים סריקה.</p>
-      </div></details>`;
+        <p class="fine">איך שולחים: לוחצים "שמירה כ-PDF", שומרים את הקובץ, ואז "שליחה בוואטסאפ" ומצרפים בצ'אט את ה-PDF, כרטיס הטיסה, צילום כרטיס האשראי וטופס ניהול החשבון. הטופס לא נשמר באתר.</p>
+      </div>`;
   }
   function advanceText(box) {
     const type = box.querySelector('input[name="advType"]:checked').value;
-    const vac = box.querySelector('input[name="vac"]:checked').value;
-    const lines = [`*${ADV_TITLE}*`, `תאריך: ${fmtD(today())}`, ...travelerLines(box), `סוג המקדמה: ${type}`,
-      `חופשה פרטית במסגרת הנסיעה: ${vac}${vac === "כן" && (val(box, "vacFrom") || val(box, "vacTo")) ? ` (${fmt(val(box, "vacFrom"))} – ${fmt(val(box, "vacTo"))})` : ""}`];
-    if (checked(box, "poa")) lines.push(`ייפוי כוח: ${val(box, "poaName")}, ת"ז ${val(box, "poaId")}`);
-    lines.push("", `✓ ${ADV_DECL}`, `חתימה: ${val(box, "name")}`, "", "מצורפים בהודעות הבאות: צילום כרטיס אשראי אישי משני הצדדים, טופס ניהול חשבון.");
-    return lines.join("\n");
-  }
-  function advancePrint(box) {
-    const v = n => esc(val(box, n));
-    const type = box.querySelector('input[name="advType"]:checked').value;
-    const vac = box.querySelector('input[name="vac"]:checked').value;
-    const row = (k, x) => `<tr><td class="k">${k}</td><td>${x}</td></tr>`;
-    return `<p>תאריך: ${fmtD(today())}</p><p>אל: משרד הביטחון – אגף הכספים</p>
-      <h1>${esc(ADV_TITLE)}</h1>
-      <table>${row("שם הנוסע/ת", v("name"))}${row("מספר תעודת זהות", v("id"))}${row("דרגה / תפקיד", v("rank"))}${row("מס' נייד", v("phone"))}${row("כתובת מייל", v("email"))}${row("יעד", v("dest"))}
-        ${row("יציאה מהארץ", `${fmt(val(box, "out"))} ${v("outTime")}`)}${row("חזרה לארץ", `${fmt(val(box, "back"))} ${v("backTime")}`)}${row("סוג המקדמה", esc(type))}
-        ${row("חופשה פרטית", esc(vac) + (vac === "כן" ? ` ${fmt(val(box, "vacFrom"))} – ${fmt(val(box, "vacTo"))}` : ""))}</table>
-      <p>${esc(ADV_REQUEST)}</p>
-      <ol>${ADV_TERMS.concat(ADV_VACATION).map(t => `<li>${esc(t)}</li>`).join("")}</ol>
-      <p><b>${esc(ADV_DECL)}</b></p>
-      <div class="sig"><div><b>${fmtD(today())}</b>תאריך</div><div><b>${v("name")}</b>שם פרטי ומשפחה</div><div><b>&nbsp;</b>חתימה</div></div>
-      ${checked(box, "poa") ? `<p style="margin-top:18pt"><b>ייפוי כוח:</b> אני ${v("name")} (ת"ז ${v("id")}) מייפה את כוחו/ה של ${v("poaName")} (ת"ז ${v("poaId")}) לקחת בשמי ובמקומי את שובר המקדמה לבנק ולמשוך עבורי את הכסף מהבנק. בזאת, אני לוקח/ת את האחריות על השובר והכסף ולא תהיה לי כל טענה למשרד הביטחון בעניין.</p>
-        <div class="sig"><div><b>&nbsp;</b>חתימת הנוסע/ת</div><div><b>&nbsp;</b>חתימת המיופה/ה</div></div>` : ""}
-      <p style="margin-top:14pt">מצורף: צילום כרטיס האשראי האישי משני צדדיו, טופס ניהול חשבון.</p>`;
+    return [`*${ADV_TITLE}*`, `תאריך: ${fmt(val(box, "date"))}`, ...travelerLines(box), `אופן קבלת המקדמה: ${type}`,
+      val(box, "poaName") ? `ייפוי כוח: ${val(box, "poaName")}, ת"ז ${val(box, "poaId")}` : "",
+      "", `✓ ${ADV_DECL}`, `חתימה: ${val(box, "signName") || val(box, "name")}`, "",
+      "מצורפים בהודעות הבאות: הטופס החתום (PDF), כרטיס טיסה, צילום כרטיס אשראי אישי משני הצדדים, טופס ניהול חשבון."].filter(x => x !== null).join("\n").replace(/\n{3,}/g, "\n\n");
   }
 
   // ---------- התחשבנות ----------
-  const EXPENSES = ["כלכלה", "לינה", 'הוצאות רכב בחו"ל', "תחבורה ל/מ שדה התעופה בארץ", 'תחבורה ל/מ שדה התעופה בחו"ל', "אחר"];
-  const SETTLE_DECL = 'אני החתום/ה מטה מצהיר/ה בזאת כי הקבלות וההוצאות שהצגתי בפני אגף הכספים/חטיבת פרט והסדרי נסיעות חו"ל הינן הוצאות שהוצאו בפועל במסגרת נסיעתי בתפקיד בלבד. הנני מודע/ת לכך כי במקרה שהפרטים הנ"ל אינם נכונים אדרש להשיב את הכספים ששולמו לי ביתר ועלול/ה להיפתח נגדי הליך משמעתי.';
-  function expRow() {
-    return `<div class="exp">
-      <select data-e="type" aria-label="סוג ההוצאה">${EXPENSES.map(e => `<option>${esc(e)}</option>`).join("")}</select>
-      <input type="date" data-e="date" aria-label="תאריך">
-      <input type="number" min="0" step="0.01" data-e="amount" placeholder="סכום" aria-label="סכום">
-      <select data-e="cur" aria-label="מטבע"><option>₪</option><option>$</option><option>€</option><option>£</option><option>אחר</option></select>
-      <input data-e="note" placeholder="הערות" aria-label="הערות">
-      <button type="button" class="del" data-del aria-label="מחיקת השורה">✕</button>
-      <div class="meals">ארוחות לקיזוז:
-        <label><input type="checkbox" data-e="m1"> בוקר</label>
-        <label><input type="checkbox" data-e="m2"> צהריים</label>
-        <label><input type="checkbox" data-e="m3"> ערב</label>
-      </div>
-    </div>`;
+  const SETTLE_ROWS = [
+    { type: "כלכלה ארוחות יש לסמן את הארוחות שנדרש לקזז", key: "food", meals: true, note: 'ללא קבלות בהתחשבנות. הצהרה על ניכוי ארוחות רשמיות שהוזמנתי על חשבון השותף בחו"ל/ מארחים/כנס/קורס [כלומר, ללא שימוש בקצובה]' },
+    { type: "לינה", key: "hotel", note: "יש להגיש קבלה בפירוט מספר ימים ומחיר ללילה ושם נוסע הלן/נה בחדר המשותף. לחריגה מקצובת הלינה יצורף אישור טרם הנסיעה." },
+    { type: 'הוצאות רכב בחו"ל', key: "car", note: 'קבלה על דלק עם פרוט כמות ומחיר לגלון/לליטר. חל איסור על תדלוק בחברת השכרת הרכבו כן קבלות מסוג re-paid. קבלה על חניה בחו"ל, כבישי אגרה' },
+    { type: "תחבורה ל/מ שד ההתעופה בארץ", key: "taxiIL", note: "מוניות בארץ כנגד קבלה/חניה בשדה עד לגובה של 50 ליום" },
+    { type: 'תחבורה ל/מ שדה התעופה בחו"ל', key: "taxiAbroad", note: 'מוניות כנגד קבלה תחבורה ציבורית לצרכי עבודה בלבד יש לציין את היעד והמטרה. כאשר משולבת חופשה פרטית החזר המונית אל/מ שדה"ת יתבצע כאשר אין שינוי במקום התפקיד' },
+    { type: "אחר", key: "other", note: "באישור מראש כנס, קורס, מזוודה" }
+  ];
+  const SETTLE_DECL = 'אני הח"מ מצהיר בזאת כי הקבלות וההוצאות שהצגתי בפני אגף הכספים/חטיבת פרט והסדרי נסיעות חו"ל הינן הוצאות שהוצאו בפועל במסגרת נסיעתי בתפקיד בלבד.';
+  const SETTLE_DECL2 = "הנני מודע לכך כי במקרה הפרטים הנ\"ל אינם נכונים אדרש להשיב את הכספים ששולמו לי ביתר ועלול להיפתח נגדי הליך משמעתי.";
+  function entryRow(row, first) {
+    const meal = n => row.meals ? `<input type="checkbox" data-m="${n}" aria-label="${n}">` : "";
+    return `<tr data-row="${row.key}">
+      ${first ? `<td class="type" rowspan="1">${esc(row.type)}<button type="button" class="add-line no-print" data-addline="${row.key}">+ שורה</button></td>` : ""}
+      <td><input class="cell" type="date" data-c="date" required aria-label="תאריך"></td>
+      <td class="m">${meal("בוקר")}</td><td class="m">${meal("צהריים")}</td><td class="m">${meal("ערב")}</td>
+      <td><input class="cell" data-c="amount" inputmode="decimal" aria-label="סכום"></td>
+      ${first ? `<td class="note" rowspan="1">${esc(row.note)}</td>` : ""}
+    </tr>`;
   }
   function settleHtml() {
     return `
-      <div class="callout" data-due>את ההתחשבנות מגישים <b>עד חודש מיום החזרה ארצה</b>. אחרי שממלאים את תאריך החזרה, יופיע כאן המועד האחרון.</div>
-      <div class="callout warn"><b>יש לצרף בנוסף לטופס:</b><ul><li>קבלות סרוקות</li><li>אישור ניהול חשבון בנק</li><li>צילום כרטיס אשראי משני הצדדים</li></ul></div>
-      <details class="fold"><summary>1. קריאת הטופס לפני המילוי</summary><div class="in">
-        <a class="form-img" href="settlement-form.jpg" target="_blank" rel="noopener" title="פתיחת הטופס בגודל מלא">
-          <img src="settlement-form.jpg" alt="טופס התחשבנות לאחר נסיעת חו&quot;ל בתפקיד" loading="lazy">
-        </a>
+      <div class="callout no-print" data-due>את ההתחשבנות מגישים <b>עד חודש מיום החזרה ארצה</b>. אחרי שממלאים את תאריך החזרה, יופיע כאן המועד האחרון.</div>
+      <div class="callout warn no-print"><b>מצרפים לטופס:</b><ul><li>קבלות סרוקות</li><li>אישור ניהול חשבון בנק</li><li>צילום כרטיס אשראי משני הצדדים</li></ul></div>
+      <p class="hint no-print">ממלאים ישירות על הטופס. בכל סעיף אפשר להוסיף שורות עם "+ שורה". <a href="settlement-form.jpg" target="_blank" rel="noopener">לצפייה בטופס המקורי</a> · <a href="settlement-form.pdf" target="_blank" rel="noopener" download>הורדת המקור (PDF)</a></p>
+      <div class="paper-scroll"><div data-form="settle">
+      <article class="paper">
+        <p class="fl" style="text-align:left">תאריך ${inp("date", "w2", "date", `value="${todayIso()}"`)}</p>
+        <h4>התחשבנות לאחר נסיעת חו"ל בתפקיד</h4>
+        ${travelerBlock(`<p class="fl">נמשכה מקדמה בסכום של ${inp("advance", "w3")}</p>`)}
+        <p>ההוצאות בפועל המפורטות להלן הינן הוצאות לזמן השהות בתפקיד בלבד:</p>
+        <div class="tbl-wrap"><table class="tbl">
+          <thead><tr><th>סוג ההוצאה</th><th>תאריך</th><th>בוקר</th><th>צהריים</th><th>ערב</th><th>סכום</th><th>הערות</th></tr></thead>
+          ${SETTLE_ROWS.map(r => `<tbody data-group="${r.key}">${entryRow(r, true)}</tbody>`).join("")}
+        </table></div>
+        <p class="decl-title"><u><b>הצהרה</b></u></p>
+        <p class="para"><b>${esc(SETTLE_DECL)}</b></p>
+        <p class="para"><b>${esc(SETTLE_DECL2)}</b></p>
+        <p class="fl"><b>שם הנוסע:</b> ${inp("signName", "w3")} <b>ת.ז:</b> ${inp("signId", "w2")} <b>אגף/חייל ותפקיד:</b> ${inp("unit", "w3")} <b>דרגה</b> ${inp("signRank", "w1")}</p>
+        <p class="fl"><b>חתימת הנוסע:</b> ${sigPad("main")}</p>
+      </article>
+      </div></div>
+      <div class="actions-box no-print" data-actions="settle">
         <div class="row-btns">
-          <a class="btn line" href="settlement-form.jpg" target="_blank" rel="noopener">הגדלת הטופס</a>
-          <a class="btn line" href="settlement-form.pdf" target="_blank" rel="noopener" download>הורדת הטופס (PDF)</a>
-        </div>
-      </div></details>
-      <details class="fold" open><summary>2. מילוי מקוון</summary><div class="in" data-form="settle">
-        ${travelerFields()}
-        <div class="form-grid" style="margin-top:10px"><label class="field">נמשכה מקדמה בסכום של<input data-f="advance" inputmode="decimal"></label></div>
-        <p class="section-title">ההוצאות בפועל לזמן השהות בתפקיד בלבד</p>
-        <div class="exp-list" data-exps>${expRow()}</div>
-        <div class="row-btns"><button type="button" class="ghost" data-add>+ הוספת הוצאה</button><span class="total" data-total></span></div>
-        <label class="check"><input type="checkbox" data-f="decl"><span>${esc(SETTLE_DECL)}</span></label>
-        <div class="row-btns">
+          <button class="btn primary" data-print="settle">שמירה כ-PDF / הדפסה</button>
           <button class="btn wa" data-send="settle">שליחה בוואטסאפ</button>
           <span data-msg></span>
         </div>
-        <p class="fine">הטופס לא נשמר באתר. אחרי השליחה מצרפים בצ'אט את הקבלות הסרוקות, אישור ניהול החשבון וצילום כרטיס האשראי.</p>
-      </div></details>`;
+        <p class="fine">איך שולחים: לוחצים "שמירה כ-PDF", שומרים את הקובץ, ואז "שליחה בוואטסאפ" ומצרפים בצ'אט את ה-PDF, הקבלות הסרוקות, אישור ניהול החשבון וצילום כרטיס האשראי. הטופס לא נשמר באתר.</p>
+      </div>`;
   }
-  function expData(row) {
-    const g = n => row.querySelector(`[data-e="${n}"]`);
-    return { type: g("type").value, date: g("date").value, amount: parseFloat(g("amount").value) || 0, cur: g("cur").value, note: g("note").value.trim(),
-             meals: ["m1", "m2", "m3"].filter(m => g(m).checked).map(m => ({ m1: "בוקר", m2: "צהריים", m3: "ערב" })[m]) };
+  function fixRowspans(box) {
+    box.querySelectorAll("tbody[data-group]").forEach(tb => {
+      const n = tb.rows.length;
+      tb.querySelectorAll("td.type, td.note").forEach(td => td.rowSpan = n);
+    });
+  }
+  function settleEntries(box) {
+    const out = [];
+    SETTLE_ROWS.forEach(r => box.querySelectorAll(`tr[data-row="${r.key}"]`).forEach(tr => {
+      const date = tr.querySelector('[data-c="date"]').value, amount = tr.querySelector('[data-c="amount"]').value.trim();
+      const meals = [...tr.querySelectorAll("[data-m]")].filter(x => x.checked).map(x => x.dataset.m);
+      if (date || amount || meals.length) out.push({ type: r.type.split(" ")[0] === "כלכלה" ? "כלכלה" : r.type, date, amount, meals });
+    }));
+    return out;
   }
   function refreshSettle(box) {
-    box.querySelectorAll(".exp").forEach(r => { r.querySelector(".meals").hidden = r.querySelector('[data-e="type"]').value !== "כלכלה"; });
-    const sums = {};
-    box.querySelectorAll(".exp").forEach(r => { const e = expData(r); if (e.amount) sums[e.cur] = (sums[e.cur] || 0) + e.amount; });
-    const parts = Object.entries(sums).map(([c, v]) => `${v.toLocaleString("he-IL")} ${c}`);
-    box.querySelector("[data-total]").textContent = parts.length ? `סה"כ: ${parts.join(" + ")}` : "";
     const back = parse(val(box, "back")), due = document.querySelector("[data-due]");
     if (back && due) {
       const d = new Date(back); d.setMonth(d.getMonth() + 1);
       const left = Math.round((d - today()) / 86400000);
-      due.className = "callout" + (left < 0 ? " bad" : "");
+      due.className = "callout no-print" + (left < 0 ? " bad" : "");
       due.innerHTML = left < 0 ? `המועד להגשת ההתחשבנות עבר (${fmtD(d)}).` : `את ההתחשבנות מגישים <b>עד ${fmtD(d)}</b>, חודש מיום החזרה${left <= 31 ? `. נשארו ${left} ימים` : ""}.`;
     }
   }
   function settleText(box) {
-    const lines = [`*התחשבנות לאחר נסיעת חו"ל בתפקיד*`, `תאריך: ${fmtD(today())}`, ...travelerLines(box),
-      val(box, "advance") ? `נמשכה מקדמה בסכום של: ${val(box, "advance")}` : "נמשכה מקדמה: לא צוין", "", "*הוצאות:*"];
-    const exps = [...box.querySelectorAll(".exp")].map(expData).filter(e => e.amount || e.meals.length || e.note || e.date);
-    if (!exps.length) lines.push("אין הוצאות");
-    exps.forEach(e => lines.push(`• ${e.type}${e.date ? ` | ${fmt(e.date)}` : ""}${e.amount ? ` | ${e.amount.toLocaleString("he-IL")} ${e.cur}` : ""}${e.meals.length ? ` | ארוחות לקיזוז: ${e.meals.join(", ")}` : ""}${e.note ? ` | ${e.note}` : ""}`));
-    const total = box.querySelector("[data-total]").textContent; if (total) lines.push(total);
-    lines.push("", "✓ הצהרתי כי ההוצאות הוצאו בפועל במסגרת נסיעתי בתפקיד בלבד.", `חתימה: ${val(box, "name")}`, "", "מצורפים בהודעות הבאות: קבלות סרוקות, אישור ניהול חשבון בנק, צילום כרטיס אשראי משני הצדדים.");
-    return lines.join("\n");
+    const lines = [`*התחשבנות לאחר נסיעת חו"ל בתפקיד*`, `תאריך: ${fmt(val(box, "date"))}`, ...travelerLines(box),
+      val(box, "advance") ? `נמשכה מקדמה בסכום של: ${val(box, "advance")}` : "", "", "*הוצאות:*"];
+    const ex = settleEntries(box);
+    if (!ex.length) lines.push("אין הוצאות");
+    ex.forEach(e => lines.push(`• ${e.type}${e.date ? ` | ${fmt(e.date)}` : ""}${e.amount ? ` | ${e.amount}` : ""}${e.meals.length ? ` | ארוחות לקיזוז: ${e.meals.join(", ")}` : ""}`));
+    lines.push("", "✓ הצהרתי כי ההוצאות הוצאו בפועל במסגרת נסיעתי בתפקיד בלבד.", `חתימה: ${val(box, "signName") || val(box, "name")}`, "",
+      "מצורפים בהודעות הבאות: הטופס החתום (PDF), קבלות סרוקות, אישור ניהול חשבון בנק, צילום כרטיס אשראי משני הצדדים.");
+    return lines.filter((x, i, a) => !(x === "" && a[i - 1] === "")).join("\n");
+  }
+
+  // העתקת פרטים שחוזרים על עצמם בטופס (שם ות"ז בחתימה ובייפוי הכוח)
+  const MIRRORS = { name: ["signName", "poaMyName"], id: ["signId", "poaMyId"], rank: ["signRank"] };
+  function mirror(box, src) {
+    (MIRRORS[src.dataset.f] || []).forEach(t => {
+      const el = box.querySelector(`[data-f="${t}"]`);
+      if (el && (!el.value || el.dataset.auto === "1")) { el.value = src.value; el.dataset.auto = "1"; }
+    });
   }
 
   // ---------- ניווט ----------
@@ -433,8 +490,9 @@
     const d = DOCS.find(x => x.id === id);
     const app = document.getElementById("app");
     if (!d) { app.innerHTML = libraryHtml(); document.title = "מאגר מסמכים – נסיעות בתפקיד"; return; }
-    const body = id === "calc" ? calcHtml() : id === "advance" ? `<section class="panel">${advanceHtml()}</section>` : `<section class="panel">${settleHtml()}</section>`;
+    const body = id === "calc" ? calcHtml() : id === "advance" ? advanceHtml() : settleHtml();
     app.innerHTML = docHead(d) + body;
+    setupSigs(app);
     document.title = d.title;
     window.scrollTo(0, 0);
   }
@@ -456,36 +514,38 @@
       window.open(`https://wa.me/?text=${encodeURIComponent(`${d.title}\n${docUrl(d.id)}`)}`, "_blank", "noopener");
       return;
     }
-    const add = e.target.closest("[data-add]");
-    if (add) { const box = add.closest("[data-form]"); box.querySelector("[data-exps]").insertAdjacentHTML("beforeend", expRow()); refreshSettle(box); return; }
-    const del = e.target.closest("[data-del]");
-    if (del) { const box = del.closest("[data-form]"); del.closest(".exp").remove(); refreshSettle(box); return; }
+    const sc = e.target.closest("[data-sig-clear]");
+    if (sc) { const c = document.querySelector(`[data-sig="${sc.dataset.sigClear}"]`); c.getContext("2d").clearRect(0, 0, c.width, c.height); delete c.dataset.signed; return; }
+    const al = e.target.closest("[data-addline]");
+    if (al) {
+      const r = SETTLE_ROWS.find(x => x.key === al.dataset.addline), tb = al.closest("tbody");
+      tb.insertAdjacentHTML("beforeend", entryRow(r, false)); fixRowspans(tb.closest("[data-form]")); return;
+    }
     const send = e.target.closest("[data-send]");
     if (send) {
-      const box = send.closest("[data-form]");
-      if (!val(box, "name") || !val(box, "id")) { say(box, "חסרים שם ומספר תעודת זהות."); return; }
-      if (!checked(box, "decl")) { say(box, "יש לסמן את ההצהרה לפני השליחה."); return; }
-      openWhatsApp(send.dataset.send === "advance" ? advanceText(box) : settleText(box));
-      say(box, "נפתח וואטסאפ. לא לשכוח לצרף את הקבצים.", true);
+      const kind = send.dataset.send, form = document.querySelector(`[data-form="${kind}"]`), box = send.closest("[data-actions]");
+      if (!val(form, "name") || !val(form, "id")) { say(box, "חסרים שם ומספר תעודת זהות בראש הטופס."); return; }
+      if (kind === "advance" && !box.querySelector('[data-a="ticket"]').checked) { say(box, "לבקשת מקדמה חובה לצרף כרטיס טיסה. יש לסמן שהוא יצורף."); return; }
+      if (!signed(form, "main")) { say(box, "חסרה חתימה בתחתית הטופס."); return; }
+      openWhatsApp(kind === "advance" ? advanceText(form) : settleText(form));
+      say(box, "נפתח וואטסאפ. לא לשכוח לצרף את ה-PDF ואת המסמכים.", true);
       return;
     }
     const pr = e.target.closest("[data-print]");
     if (pr) {
-      const box = pr.closest("[data-form]");
-      if (!val(box, "name")) { say(box, "כדאי למלא לפחות שם לפני ההדפסה."); return; }
-      document.getElementById("print").innerHTML = advancePrint(box);
+      const kind = pr.dataset.print, form = document.querySelector(`[data-form="${kind}"]`), box = pr.closest("[data-actions]");
+      if (kind === "advance" && !box.querySelector('[data-a="ticket"]').checked) { say(box, "לבקשת מקדמה חובה לצרף כרטיס טיסה. יש לסמן שהוא יצורף."); return; }
+      document.title = (kind === "advance" ? "מקדמה" : "התחשבנות") + " - " + (val(form, "name") || "טופס");
       window.print();
+      document.title = DOCS.find(x => x.id === kind).title;
     }
   });
   function onField(e) {
     const calc = e.target.closest("[data-calc]"); if (calc) runCalc(calc);
-    const box = e.target.closest("[data-form]");
-    if (!box) return;
-    if (box.dataset.form === "settle") refreshSettle(box);
-    if (box.dataset.form === "advance") {
-      box.querySelector("[data-vac]").hidden = box.querySelector('input[name="vac"]:checked').value !== "כן";
-      box.querySelector("[data-poa]").hidden = !checked(box, "poa");
-    }
+    const form = e.target.closest("[data-form]");
+    if (!form) return;
+    if (e.target.dataset && e.target.dataset.f) { if (MIRRORS[e.target.dataset.f]) mirror(form, e.target); else delete e.target.dataset.auto; }
+    if (form.dataset.form === "settle") refreshSettle(form);
   }
   document.addEventListener("input", onField);
   document.addEventListener("change", onField);
