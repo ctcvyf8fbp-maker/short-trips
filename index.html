@@ -3,16 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>נסיעות קרובות</title>
+<title>מאגר מסמכים – נסיעות בתפקיד</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #FAFAF8; --card: #FFFFFF; --ink: #16181D; --muted: #7D828C; --line: #E4E6EA; --soft: #F1F2F4;
-    --main: #0F6B5C; --main-soft: #E2F2EE;
-    --hot: #D1342B; --hot-soft: #FDE8E6;
-    --r-in: #2E5597; --r-out: #0F7C7A; --r-sys: #6A3D9A;
+    --bg: #FAFAF8; --card: #FFFFFF; --ink: #16181D; --muted: #707680; --line: #E4E6EA; --soft: #F1F2F4;
+    --main: #0F6B5C; --main-soft: #E2F2EE; --hot: #C9302C; --hot-soft: #FDE8E6; --warn: #FBEFD9; --warn-ink: #6B4A00;
+    --wa: #1F9D55;
     --shadow: 0 1px 2px rgba(22,24,29,.05), 0 6px 18px rgba(22,24,29,.05);
     box-sizing: border-box;
     padding-top: env(safe-area-inset-top, 0px);
@@ -22,317 +21,199 @@
     :root:not([data-theme="light"]) {
       color-scheme: dark;
       --bg: #111416; --card: #1A1E21; --ink: #ECEEF0; --muted: #98A0A8; --line: #2B3136; --soft: #23282C;
-      --main: #4FC3A9; --main-soft: #173A33; --hot: #F0675C; --hot-soft: #3E1F1C;
-      --r-in: #7FA2E8; --r-out: #49C2BE; --r-sys: #B79BE0;
+      --main: #4FC3A9; --main-soft: #173A33; --hot: #F0675C; --hot-soft: #3E1F1C; --warn: #3A2E16; --warn-ink: #F2D59A;
       --shadow: none;
     }
   }
   *, *::before, *::after { box-sizing: border-box; }
   [hidden] { display: none !important; }
   html { scroll-padding-top: env(safe-area-inset-top, 0px); }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.5 "Assistant", "Segoe UI", Arial, sans-serif; }
-  button { font: inherit; color: inherit; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.55 "Assistant", "Segoe UI", Arial, sans-serif; }
+  button, input, select { font: inherit; color: inherit; }
   :focus-visible { outline: 3px solid var(--main); outline-offset: 3px; border-radius: 6px; }
-  .wrap { max-width: 860px; margin: 0 auto; padding: 32px 18px 64px; }
+  a { color: var(--main); }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 30px 18px 64px; }
 
-  header.page { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 6px 16px; }
-  header.page h1 { margin: 0; font: 700 clamp(1.7rem, 5vw, 2.2rem)/1.15 "Rubik", "Assistant", sans-serif; }
-  #updated { color: var(--muted); font-size: .92rem; }
-  .filter { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 4px; }
-  .filter button { border: 1px solid var(--line); background: var(--card); padding: 6px 15px; border-radius: 99px; font-weight: 600; font-size: .92rem; cursor: pointer; }
-  .filter button[aria-pressed="true"] { background: var(--main); border-color: var(--main); color: var(--card); }
+  .site-head { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; }
+  .site-head .logo { width: 44px; height: 44px; border-radius: 14px; background: var(--main); display: grid; place-items: center; flex: none; }
+  .site-head .logo svg { width: 26px; height: 26px; fill: var(--card); transform: rotate(-45deg); }
+  .site-head h1 { margin: 0; font: 700 clamp(1.5rem, 4.6vw, 2rem)/1.15 "Rubik", "Assistant", sans-serif; }
+  .site-head p { margin: 2px 0 0; color: var(--muted); font-size: .95rem; }
 
-  .group { margin-top: 30px; }
-  .group-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-  .group-head h2 { margin: 0; font: 700 1.25rem "Rubik", "Assistant", sans-serif; }
-  .group-head .count { font-size: .8rem; font-weight: 700; color: var(--main); background: var(--main-soft); border-radius: 99px; padding: 1px 10px; }
-  .group-head::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-  .empty { border: 2px dashed var(--line); border-radius: 18px; padding: 26px; text-align: center; color: var(--muted); }
-  .empty svg { display: block; width: 26px; height: 26px; margin: 0 auto 8px; fill: var(--line); transform: rotate(-45deg); }
+  /* מאגר */
+  .lib { display: grid; gap: 14px; }
+  .doc-card { background: var(--card); border-radius: 18px; box-shadow: var(--shadow); padding: 20px 22px; display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; }
+  .doc-card .icon { grid-row: span 2; width: 46px; height: 46px; border-radius: 12px; background: var(--main-soft); color: var(--main); display: grid; place-items: center; font-size: 1.4rem; }
+  .doc-card h2 { margin: 0; font: 700 1.2rem/1.3 "Rubik", "Assistant", sans-serif; }
+  .doc-card p { margin: 0; color: var(--muted); font-size: .95rem; }
+  .doc-card .actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; border-radius: 10px; padding: 8px 15px; font-weight: 700; font-size: .92rem; cursor: pointer; text-decoration: none; border: 1px solid transparent; }
+  .btn.primary { background: var(--main); color: var(--card); }
+  .btn.line { background: var(--card); border-color: var(--main); color: var(--main); }
+  .btn.wa { background: var(--wa); color: #fff; }
+  .btn.quiet { background: var(--soft); color: var(--ink); }
+  .copied { color: var(--main); font-weight: 700; font-size: .88rem; align-self: center; }
 
-  .card { background: var(--card); border-radius: 20px; box-shadow: var(--shadow); margin-bottom: 14px; border: 1px solid transparent; }
-  .card.hot { border-color: var(--hot); }
-  .card-main { display: block; width: 100%; text-align: start; background: none; border: 0; padding: 22px 24px 18px; cursor: pointer; border-radius: 20px; }
-  .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
-  .top h3 { margin: 0; font: 700 1.3rem/1.25 "Rubik", "Assistant", sans-serif; }
-  .when { color: var(--muted); font-size: .95rem; margin-top: 2px; }
-  .when span + span::before { content: "  |  "; color: var(--line); }
-  .count-down { text-align: left; flex: none; }
-  .count-down b { display: block; font: 700 2.5rem/1 "Rubik", sans-serif; color: var(--main); }
-  .count-down small { color: var(--muted); font-size: .82rem; }
-  .card.hot .count-down b { color: var(--hot); }
-  .count-down.done b { font-size: 1.1rem; color: var(--muted); }
-
-  /* מסלול האישורים */
-  .route { position: relative; display: flex; justify-content: space-between; align-items: center; height: 32px; margin: 24px 4px 4px; }
-  .route::before { content: ""; position: absolute; inset-inline: 0; top: 15px; border-top: 2px dashed var(--line); }
-  .route .trail { position: absolute; inset-inline-start: 0; top: 15px; height: 2px; background: var(--main); transition: width .6s ease; }
-  .stop { position: relative; z-index: 1; width: 14px; height: 14px; padding: 0; border-radius: 50%; border: 2px solid var(--line); background: var(--card); cursor: pointer; flex: none; }
-  .stop.ok { background: var(--c, var(--main)); border-color: var(--c, var(--main)); }
-  .stop.no { background: var(--hot); border-color: var(--hot); }
-  .stop.wip { border-color: var(--c, var(--main)); border-style: dotted; }
-  .stop.open { box-shadow: 0 0 0 4px var(--soft); }
-  .plane { position: relative; z-index: 2; flex: none; width: 32px; height: 32px; margin: 0 -9px; border-radius: 50%; display: grid; place-items: center; background: var(--main-soft); border: 0; padding: 0; cursor: pointer; }
-  .plane svg { width: 22px; height: 22px; fill: var(--main); transform: rotate(-90deg); }
-  .card.hot .plane { background: var(--hot-soft); }
-  .card.hot .plane svg, .plane.no svg { fill: var(--hot); }
-  .plane.landed { background: var(--main); }
-  .plane.landed svg { fill: var(--card); }
-  .stop-label:empty { display: none; }
-  .stop-label { font-size: .88rem; color: var(--muted); text-align: center; margin-top: 2px; }
-
-  .status { margin-top: 6px; font-size: .98rem; }
-  .status b { color: var(--main); }
-  .card.hot .status b, .status .bad { color: var(--hot); }
-  .rounds { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 4px; font-size: .88rem; color: var(--muted); }
-  .rounds span::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--c); margin-inline-end: 6px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-  .chip { font-size: .82rem; font-weight: 600; border-radius: 99px; padding: 3px 12px; background: var(--soft); color: var(--muted); }
-  .chip.ok { background: var(--main-soft); color: var(--main); }
-  .chip.no { background: var(--hot-soft); color: var(--hot); }
-  .alert { margin-top: 12px; font-weight: 700; color: var(--hot); }
-  .more-hint { display: block; margin-top: 10px; font-size: .85rem; color: var(--muted); }
-
-  /* פרטים שנפתחים */
-  .details { display: none; border-top: 1px solid var(--line); padding: 18px 24px 22px; }
-  .card.expanded .details { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 28px; }
-  .details h4 { margin: 0 0 8px; font-size: .95rem; color: var(--muted); font-weight: 600; }
-  .details .wide { grid-column: 1 / -1; }
-  .checks { list-style: none; margin: 0; padding: 0; }
-  .checks li { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
-  .box { flex: none; width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--line); display: grid; place-items: center; font-size: .75rem; font-weight: 700; color: var(--card); }
-  .yes .box { background: var(--main); border-color: var(--main); }
-  .checks .tag { margin-inline-start: auto; font-size: .82rem; color: var(--muted); }
-  .yes .tag { color: var(--main); font-weight: 600; }
-  .people { width: 100%; border-collapse: collapse; font-size: .95rem; }
-  .people th { font-size: .78rem; font-weight: 600; color: var(--muted); text-align: center; padding: 0 4px 6px; }
-  .people th:first-child { text-align: start; }
-  .people td { padding: 6px 4px; border-top: 1px solid var(--soft); text-align: center; }
-  .people td:first-child { text-align: start; }
-  .people .box { margin: 0 auto; }
-  .people .box.yes { background: var(--main); border-color: var(--main); }
-  .unassigned { margin-top: 24px; color: var(--muted); font-size: .9rem; }
-  .steps { list-style: none; margin: 0 0 12px; padding: 0; }
-  .steps .round-name { font-weight: 700; color: var(--c); margin: 10px 0 2px; font-size: .9rem; }
-  .steps li.step { display: flex; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--soft); }
-  .steps .n { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: .72rem; font-weight: 700; border: 2px solid var(--c, var(--main)); color: var(--c, var(--main)); }
-  .steps .n.ok { background: var(--c, var(--main)); color: var(--card); }
-  .pill { margin-inline-start: auto; font-size: .78rem; font-weight: 700; padding: 1px 10px; border-radius: 99px; background: var(--soft); color: var(--muted); white-space: nowrap; }
-  .pill.ok { background: var(--main-soft); color: var(--main); }
-  .pill.wip { background: #FBEFD9; color: #9A6300; }
-  .pill.no { background: var(--hot-soft); color: var(--hot); }
-  .notes { white-space: pre-line; }
-  .btn { display: inline-block; margin-top: 10px; background: var(--main); color: var(--card); text-decoration: none; font-weight: 700; padding: 8px 16px; border-radius: 10px; font-size: .9rem; }
-  @media (max-width: 640px) {
-    .card-main { padding: 18px 16px 14px; }
-    .details { padding: 16px; }
-    .card.expanded .details { grid-template-columns: 1fr; }
-    .count-down b { font-size: 2rem; }
-    .stop { width: 11px; height: 11px; }
-    .plane { width: 28px; height: 28px; margin: 0 -8px; }
-    .plane svg { width: 19px; height: 19px; }
-  }
-
-  .share { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--soft); padding-top: 14px; }
-  .share button { border: 1px solid var(--main); background: var(--card); color: var(--main); font-weight: 700; padding: 7px 16px; border-radius: 10px; cursor: pointer; font-size: .9rem; }
-  .share small { color: var(--muted); }
-  .share .done { color: var(--main); font-weight: 700; }
-  .single .card-main { cursor: default; }
-  .single .more-hint, .single .share { display: none; }
-
-  /* התחשבנות, מחשבון וסיכום נסיעה */
-  .block { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 18px; }
-  .block > h4 { font-size: 1.05rem; color: var(--ink); font-weight: 700; margin-bottom: 10px; }
+  /* עמוד מסמך */
+  .back { display: inline-block; margin-bottom: 14px; font-weight: 600; text-decoration: none; }
+  .doc-head h2 { margin: 0 0 4px; font: 700 clamp(1.5rem, 4.6vw, 2rem)/1.2 "Rubik", "Assistant", sans-serif; }
+  .doc-head p { margin: 0 0 14px; color: var(--muted); }
+  .doc-head .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .panel { background: var(--card); border-radius: 18px; box-shadow: var(--shadow); padding: 20px 22px; margin-bottom: 16px; }
+  .panel > h3 { margin: 0 0 12px; font: 700 1.1rem "Rubik", "Assistant", sans-serif; }
   .callout { background: var(--soft); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; font-size: .95rem; }
-  .callout.warn { background: #FBEFD9; color: #6B4A00; }
+  .callout.warn { background: var(--warn); color: var(--warn-ink); }
   .callout.bad { background: var(--hot-soft); color: var(--hot); }
   .callout ul { margin: 6px 0 0; padding-inline-start: 20px; }
-  details.fold { border: 1px solid var(--line); border-radius: 12px; margin-bottom: 10px; background: var(--card); }
-  details.fold > summary { cursor: pointer; padding: 12px 14px; font-weight: 700; list-style: none; }
+  details.fold { border: 1px solid var(--line); border-radius: 14px; margin-bottom: 12px; background: var(--card); }
+  details.fold > summary { cursor: pointer; padding: 14px 16px; font-weight: 700; list-style: none; }
   details.fold > summary::-webkit-details-marker { display: none; }
   details.fold > summary::after { content: " ▾"; color: var(--muted); }
   details.fold[open] > summary::after { content: " ▴"; }
-  details.fold > .in { padding: 0 14px 14px; }
+  details.fold > .in { padding: 0 16px 16px; }
+
+  /* מסמך לקריאה */
+  .paper { background: #fff; color: #1b1b1b; border: 1px solid var(--line); border-radius: 10px; padding: 22px 24px; font-size: .97rem; max-height: 70vh; overflow-y: auto; }
+  .paper h4 { text-align: center; margin: 4px 0 14px; font-size: 1.1rem; text-decoration: underline; }
+  .paper ol { padding-inline-start: 22px; margin: 12px 0; }
+  .paper li { margin-bottom: 8px; }
+  .paper .sub { font-weight: 700; margin: 16px 0 6px; }
   .form-img { display: block; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; max-height: 70vh; overflow-y: auto; }
   .form-img img { display: block; width: 100%; height: auto; }
-  a.ghost { text-decoration: none; display: inline-block; }
-  .rules { width: 100%; border-collapse: collapse; font-size: .9rem; }
-  .rules th, .rules td { text-align: start; padding: 8px 6px; border-top: 1px solid var(--soft); vertical-align: top; }
-  .rules th { width: 34%; }
-  .decl { font-size: .9rem; color: var(--muted); margin-top: 10px; }
+
+  /* טפסים */
   .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px 14px; }
   .field { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; color: var(--muted); font-weight: 600; }
-  .field input, .field select, .exp input, .exp select {
-    font: inherit; font-size: .95rem; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 9px; padding: 8px 10px; min-width: 0;
-  }
+  .field input, .field select, .exp input, .exp select { font-size: .95rem; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 9px; padding: 8px 10px; min-width: 0; }
   .field input:focus, .field select:focus, .exp input:focus, .exp select:focus { outline: 2px solid var(--main); border-color: transparent; }
+  .choice { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 2px; }
+  .choice label { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; cursor: pointer; font-weight: 600; }
+  .choice input { accent-color: var(--main); }
+  .section-title { margin: 20px 0 8px; font-weight: 700; }
+  .check { display: flex; gap: 10px; align-items: flex-start; font-size: .93rem; margin-top: 14px; }
+  .check input { margin-top: 4px; width: 18px; height: 18px; accent-color: var(--main); flex: none; }
+  .row-btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; align-items: center; }
+  .msg { font-size: .9rem; font-weight: 700; }
+  .msg.bad { color: var(--hot); } .msg.ok { color: var(--main); }
+  .fine { font-size: .82rem; color: var(--muted); margin: 10px 0 0; }
   .exp-list { margin-top: 14px; display: grid; gap: 10px; }
   .exp { display: grid; grid-template-columns: 1.3fr 1fr 1fr .7fr 1.4fr auto; gap: 8px; align-items: center; background: var(--soft); border-radius: 10px; padding: 10px; }
   .exp .meals { grid-column: 1 / -1; display: flex; gap: 14px; font-size: .88rem; color: var(--muted); align-items: center; }
-  .exp .meals[hidden] { display: none; }
   .exp .del { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 1.1rem; padding: 4px 8px; }
-  .row-btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; }
   .ghost { border: 1px dashed var(--main); background: none; color: var(--main); font-weight: 700; padding: 7px 14px; border-radius: 10px; cursor: pointer; }
-  .wa { border: 0; background: #1F9D55; color: #fff; font-weight: 700; padding: 10px 18px; border-radius: 10px; cursor: pointer; }
-  .check { display: flex; gap: 10px; align-items: flex-start; font-size: .92rem; margin-top: 14px; }
-  .check input { margin-top: 4px; width: 18px; height: 18px; accent-color: var(--main); flex: none; }
   .total { font-weight: 700; }
-  .form-msg { font-size: .9rem; font-weight: 700; }
-  .form-msg.bad { color: var(--hot); }
-  .form-msg.ok { color: var(--main); }
-  .calc-out { margin-top: 12px; display: grid; gap: 8px; }
-  .calc-line { display: flex; justify-content: space-between; gap: 12px; background: var(--soft); border-radius: 10px; padding: 10px 14px; flex-wrap: wrap; }
-  .calc-line b { font-family: "Rubik", sans-serif; }
-  .fine { font-size: .82rem; color: var(--muted); margin-top: 8px; }
-  .summary-row { display: flex; align-items: center; gap: 10px; font-weight: 700; }
-  .summary-row .box { width: 24px; height: 24px; }
-  .summary-row.yes .box { background: var(--main); border-color: var(--main); }
-  .summary-row.no-yet { color: var(--muted); }
+  .poa { border: 1px dashed var(--line); border-radius: 12px; padding: 12px 14px; margin-top: 10px; }
+
+  /* מחשבון */
+  .calc-out { margin-top: 14px; display: grid; gap: 8px; }
+  .calc-line { display: flex; justify-content: space-between; gap: 12px; background: var(--soft); border-radius: 10px; padding: 12px 14px; flex-wrap: wrap; }
+  .calc-line b { font-family: "Rubik", sans-serif; font-size: 1.1rem; }
+
   @media (max-width: 640px) {
+    .panel, .doc-card { padding: 16px; }
     .exp { grid-template-columns: 1fr 1fr; }
     .exp .del { justify-self: end; }
   }
 
-  details.past { margin-top: 4px; }
-  details.past summary { cursor: pointer; color: var(--muted); font-weight: 600; padding: 6px 2px; list-style: none; }
-  details.past summary::-webkit-details-marker { display: none; }
-  details.past summary::after { content: " ▾"; }
-  details.past[open] summary::after { content: " ▴"; }
-  details.past .card { opacity: .75; }
-
-  .problem { background: var(--card); border: 1px solid var(--hot); border-radius: 16px; padding: 18px 20px; margin-top: 24px; }
-  .problem h2 { margin: 0 0 6px; font-size: 1.1rem; color: var(--hot); }
-  @media (prefers-reduced-motion: reduce) { .route .trail { transition: none; } }
+  /* הדפסה */
+  #print { display: none; }
+  @media print {
+    body { background: #fff; color: #000; font-size: 12pt; }
+    .wrap { display: none; }
+    #print { display: block; padding: 0 8mm; }
+    #print h1 { text-align: center; font-size: 15pt; text-decoration: underline; margin: 0 0 10pt; }
+    #print table { width: 100%; border-collapse: collapse; margin: 6pt 0 10pt; }
+    #print td { border: 1px solid #999; padding: 4pt 6pt; vertical-align: top; }
+    #print td.k { width: 26%; font-weight: 700; background: #f2f2f2; }
+    #print ol { padding-inline-start: 18pt; } #print li { margin-bottom: 4pt; }
+    #print .sig { display: flex; justify-content: space-between; gap: 20pt; margin-top: 18pt; }
+    #print .sig div { flex: 1; border-top: 1px solid #000; padding-top: 3pt; text-align: center; font-size: 10pt; }
+    #print .sig b { display: block; font-size: 12pt; margin-bottom: 14pt; }
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header class="page">
-    <h1>נסיעות קרובות</h1>
-    <span id="updated"></span>
+  <header class="site-head">
+    <a class="logo" href="#" aria-label="לכל המסמכים"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C11 2 10.5 3 10.5 4V9L3 13.5V15.5L10.5 13V18L8.5 19.5V21L12 20L15.5 21V19.5L13.5 18V13L21 15.5V13.5L13.5 9V4C13.5 3 13 2 12 2Z"/></svg></a>
+    <div><h1>מאגר מסמכים</h1><p>נסיעות בתפקיד לחו"ל: טפסים, מילוי מקוון ומחשבון זכאות</p></div>
   </header>
-  <div class="filter" id="filter" hidden></div>
   <main id="app"></main>
   <datalist id="countries"></datalist>
 </div>
+<div id="print" aria-hidden="true"></div>
 
 <script>
-  // סוגי נסיעות, לפי הסדר שבו הם מופיעים באתר
-  const TYPES = ['מש"ב', 'נס"ח', 'שליחים'];
-  const URGENT_DAYS = 14;
-  const ROUND_COLORS = { "סבב פנימי": "var(--r-in)", "סבב חיצוני": "var(--r-out)", "סבב במערכת": "var(--r-sys)" };
-  const PLANE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C11 2 10.5 3 10.5 4V9L3 13.5V15.5L10.5 13V18L8.5 19.5V21L12 20L15.5 21V19.5L13.5 18V13L21 15.5V13.5L13.5 9V4C13.5 3 13 2 12 2Z"/></svg>';
-
-  let unassigned = [];
-  let trips = [], sourceNote = "", loadProblem = "", filter = "הכול";
-  const opened = new Set();
+  // ---------- רשימת המסמכים במאגר ----------
+  const DOCS = [
+    { id: "advance", icon: "💳", title: "מקדמה: מזומן או כרטיס אשראי", desc: "בקשה למקדמה לפני נסיעה בתפקיד, כולל ההתחייבויות, הצהרה על חופשה וייפוי כוח. אפשר לקרוא, למלא ולשלוח." },
+    { id: "settle", icon: "🧾", title: "התחשבנות לאחר נסיעה", desc: "הטופס המקורי לקריאה ולהורדה, מילוי מקוון של ההוצאות ושליחה בוואטסאפ. מגישים עד חודש מיום החזרה." },
+    { id: "calc", icon: "🧮", title: "מחשבון אשל ולינה", desc: "בוחרים מדינה ותאריכים ומקבלים את קצובת השהייה והלינה לפי טבלת החשב הכללי." }
+  ];
 
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const parse = d => { const m = String(d || "").match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); return m ? new Date(+m[1], m[2] - 1, +m[3]) : null; };
-  const fmt = d => { const x = parse(d); return x ? x.toLocaleDateString("he-IL", { day: "numeric", month: "numeric", year: "numeric" }) : ""; };
+  const fmtD = x => x ? x.toLocaleDateString("he-IL", { day: "numeric", month: "numeric", year: "numeric" }) : "";
+  const fmt = d => fmtD(parse(d));
   const today = () => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); };
-  const isYes = v => v === "יש" || v === true;
-  const roundColor = r => ROUND_COLORS[r] || "var(--main)";
-  const statusClass = s => s === "אושר" ? "ok" : s === "נדחה" ? "no" : s === "בטיפול" ? "wip" : "";
+  const docUrl = id => location.origin + location.pathname + "#" + id;
+  const waNumber = () => typeof WHATSAPP_NUMBER !== "undefined" ? String(WHATSAPP_NUMBER).replace(/\D/g, "") : "";
 
-  function info(t) {
-    const steps = t.approvals || [], docs = t.documents || [], people = t.participants || [];
-    const approved = steps.filter(s => s.status === "אושר").length;
-    const rejectedIdx = steps.findIndex(s => s.status === "נדחה");
-    const curIdx = rejectedIdx >= 0 ? rejectedIdx : steps.findIndex(s => s.status !== "אושר");
-    const docsReady = docs.filter(d => isYes(d.ready)).length;
-    const visas = people.filter(p => isYes(p.visa)).length;
-    const advances = people.filter(p => isYes(p.advance)).length;
-    const settled = people.filter(p => isYes(p.settlement)).length;
-    const st = parse(t.start), en = parse(t.end) || st, now = today();
-    const days = st ? Math.round((st - now) / 86400000) : null;
-    const past = en ? en < now : false;
-    const during = st && !past && st <= now;
-    const missA = steps.length - approved, missD = docs.length - docsReady;
-    const hot = !past && days !== null && days <= URGENT_DAYS && (missA > 0 || missD > 0 || rejectedIdx >= 0);
-    const summarySent = /^(נשלח|יש|כן|✓)$/.test(String(t.summary || "").trim());
-    return { summarySent, advances, settled, steps, docs, people, approved, rejectedIdx, curIdx, docsReady, visas, days, past, during, missA, missD, hot };
+  function actionsHtml(d, withOpen) {
+    return `${withOpen ? `<a class="btn primary" href="#${d.id}">פתיחה</a>` : ""}
+      <button class="btn line" data-copy="${d.id}">העתקת קישור</button>
+      <button class="btn wa" data-share="${d.id}">שליחת הקישור בוואטסאפ</button>
+      <span class="copied" data-copied="${d.id}"></span>`;
   }
 
-  function sortTrips(list) {
-    return list.slice().sort((a, b) => (a.start || "9999").localeCompare(b.start || "9999"));
+  // ---------- מאגר ----------
+  function libraryHtml() {
+    return `<div class="lib">${DOCS.map(d => `
+      <article class="doc-card">
+        <div class="icon" aria-hidden="true">${d.icon}</div>
+        <h2>${esc(d.title)}</h2>
+        <p>${esc(d.desc)}</p>
+        <div class="actions">${actionsHtml(d, true)}</div>
+      </article>`).join("")}</div>`;
   }
 
-  function routeHtml(t, i, k) {
-    const n = i.steps.length;
-    if (!n) return "";
-    const landed = i.curIdx < 0;
-    const planeAt = landed ? n - 1 : i.curIdx;
-    const trail = n > 1 ? (planeAt / (n - 1)) * 100 : 100;
-    const stops = i.steps.map((s, j) => {
-      const label = `${s.role} – ${s.status || "ממתין"}`;
-      if (j === planeAt) {
-        const cls = landed ? "landed" : s.status === "נדחה" ? "no" : "";
-        return `<button class="plane ${cls}" data-stop="${k}:${j}" title="${esc(label)}" aria-label="${esc(label)}">${PLANE}</button>`;
-      }
-      return `<button class="stop ${statusClass(s.status)}" style="--c:${roundColor(s.round)}" data-stop="${k}:${j}" title="${esc(label)}" aria-label="${esc(label)}"></button>`;
-    }).join("");
-    return `<div class="route"><span class="trail" style="width:${trail}%"></span>${stops}</div><div class="stop-label" id="label-${k}"></div>`;
+  function docHead(d) {
+    return `<a class="back" href="#">→ לכל המסמכים</a>
+      <div class="doc-head"><h2>${esc(d.title)}</h2><p>${esc(d.desc)}</p><div class="actions">${actionsHtml(d, false)}</div></div>`;
   }
 
-  function statusLine(i) {
-    if (!i.steps.length) return "";
-    if (i.rejectedIdx >= 0) return `<div class="status"><span class="bad">נדחה אצל ${esc(i.steps[i.rejectedIdx].role)}</span></div>`;
-    if (i.curIdx < 0) return `<div class="status"><b>כל האישורים התקבלו</b></div>`;
-    return `<div class="status">ממתין אצל <b>${esc(i.steps[i.curIdx].role)}</b>, אושרו ${i.approved} מתוך ${i.steps.length}</div>`;
-  }
-
-  function roundsLine(i) {
-    const rounds = [...new Set(i.steps.map(s => s.round).filter(Boolean))];
-    if (!rounds.length) return "";
-    return `<div class="rounds">${rounds.map(r => {
-      const rs = i.steps.filter(s => s.round === r), ok = rs.filter(s => s.status === "אושר").length;
-      return `<span style="--c:${roundColor(r)}">${esc(r)} ${ok === rs.length ? "הושלם" : `${ok}/${rs.length}`}</span>`;
-    }).join("")}</div>`;
-  }
-
-  function checklist(items) {
-    return `<ul class="checks">${items.map(x => `<li class="${x.yes ? "yes" : ""}"><span class="box" aria-hidden="true">${x.yes ? "✓" : ""}</span>${esc(x.label)}<span class="tag">${x.yes ? x.y : x.n}</span></li>`).join("")}</ul>`;
-  }
-
-  // ---------- מחשבון אשל ולינה ----------
+  // ---------- מחשבון ----------
   const hasRates = () => typeof RATES !== "undefined" && RATES.length;
   const countryLabel = r => `${r[0]} (${r[1]})`;
-  function calcHtml(t, k) {
-    if (!hasRates()) return "";
+  function calcHtml() {
+    if (!hasRates()) return `<div class="callout bad">טבלת התעריפים לא נטענה. כדאי לבדוק שהקובץ rates.js נמצא באתר.</div>`;
     const expired = typeof RATES_VALID_TO !== "undefined" && parse(RATES_VALID_TO) < today();
-    return `<div class="block" data-calc="${k}">
-      <h4>מחשבון אשל ולינה</h4>
+    return `<section class="panel" data-calc>
       <div class="form-grid">
         <label class="field">מדינת יעד<input list="countries" data-c="country" placeholder="למשל: ארצות הברית"></label>
         <label class="field">עיר<select data-c="city" disabled><option>בוחרים קודם מדינה</option></select></label>
-        <label class="field">תאריך התחלה<input type="date" data-c="from" value="${esc(t.start || "")}"></label>
-        <label class="field">תאריך סיום<input type="date" data-c="to" value="${esc(t.end || "")}"></label>
+        <label class="field">תאריך התחלה<input type="date" data-c="from"></label>
+        <label class="field">תאריך סיום<input type="date" data-c="to"></label>
       </div>
       <div class="calc-out" data-c="out"></div>
-      <p class="fine">החישוב לפי ${esc(typeof RATES_SOURCE !== "undefined" ? RATES_SOURCE : "טבלת התעריפים")}. ימים נספרים כימים קלנדריים מיום ההתחלה עד יום הסיום כולל, ולילות כמספר הלילות ביניהם. זו הערכה בלבד; הזכאות הסופית נקבעת לפי הוראת תכ"ם 13.10.2 (כולל כללים לימי יציאה וחזרה).</p>
-      ${expired ? `<div class="callout warn">שימו לב: הטבלה בתוקף עד ${fmt(RATES_VALID_TO)}. ייתכן שפורסמה מהדורה חדשה עם תעריפים מעודכנים.</div>` : ""}
-    </div>`;
+      <p class="fine">החישוב לפי ${esc(typeof RATES_SOURCE !== "undefined" ? RATES_SOURCE : "טבלת התעריפים")}. ימים נספרים כימים קלנדריים מיום ההתחלה עד יום הסיום כולל, ולילות כמספר הלילות ביניהם. זו הערכה בלבד; הזכאות הסופית נקבעת לפי הוראת תכ"ם 13.10.2, כולל הכללים לימי יציאה וחזרה ולחופשה פרטית.</p>
+      ${expired ? `<div class="callout warn" style="margin-top:12px">שימו לב: הטבלה בתוקף עד ${fmt(RATES_VALID_TO)}. ייתכן שפורסמה מהדורה חדשה עם תעריפים מעודכנים.</div>` : ""}
+    </section>`;
   }
   function runCalc(box) {
     const q = s => box.querySelector(`[data-c="${s}"]`);
     const typed = q("country").value.trim();
     const rows = RATES.filter(r => countryLabel(r) === typed || r[0] === typed || r[1].toLowerCase() === typed.toLowerCase());
-    const citySel = q("city");
-    const prevCity = citySel.value;
+    const citySel = q("city"), prev = citySel.value;
     if (rows.length) {
       const cities = [...new Set(rows.map(r => r[2]))];
-      citySel.innerHTML = cities.map(c => `<option ${c === prevCity ? "selected" : ""}>${esc(c)}</option>`).join("");
+      citySel.innerHTML = cities.map(c => `<option ${c === prev ? "selected" : ""}>${esc(c)}</option>`).join("");
       citySel.disabled = cities.length < 2;
-    } else {
-      citySel.innerHTML = `<option>${typed ? "יעד שלא בטבלה" : "בוחרים קודם מדינה"}</option>`;
-      citySel.disabled = true;
-    }
+    } else { citySel.innerHTML = `<option>${typed ? "יעד שלא בטבלה" : "בוחרים קודם מדינה"}</option>`; citySel.disabled = true; }
     const from = parse(q("from").value), to = parse(q("to").value), out = q("out");
     if (!typed || !from || !to) { out.innerHTML = ""; return; }
     if (to < from) { out.innerHTML = `<div class="callout bad">תאריך הסיום לפני תאריך ההתחלה.</div>`; return; }
-    const days = Math.round((to - from) / 86400000) + 1, nights = days - 1;
-    const n = x => x.toLocaleString("he-IL");
+    const days = Math.round((to - from) / 86400000) + 1, nights = days - 1, n = x => x.toLocaleString("he-IL");
     if (!rows.length) {
       out.innerHTML = `<div class="callout">היעד לא נמצא בטבלה. ליעדים שאינם בטבלה קצובת השהייה היא ${RATES_DEFAULT_PERDIEM} ₪ ליום, כלומר <b>${n(RATES_DEFAULT_PERDIEM * days)} ₪</b> ל-${days} ימים. את קצובת הלינה יש לבדוק מול הגורם המאשר.</div>`;
       return;
@@ -343,20 +224,140 @@
       <div class="calc-line"><span>קצובת לינה: עד ${n(r[4])} ${r[3]} ללילה × ${nights} ${nights === 1 ? "לילה" : "לילות"}</span><b>עד ${n(r[4] * nights)} ${r[3]}</b></div>`;
   }
 
-  // ---------- טופס התחשבנות ----------
-  const EXPENSES = [
-    ["כלכלה", "ללא קבלות. מסמנים את הארוחות שיש לקזז: ארוחות רשמיות שהוזמנו על חשבון השותף בחו\"ל, מארחים, כנס או קורס (כלומר ללא שימוש בקצובה)."],
-    ["לינה", "יש להגיש קבלה עם פירוט מספר ימים ומחיר ללילה, ושם הנוסע. שהייה בחדר משותף. חריגה מקצובת הלינה מחייבת אישור לפני הנסיעה."],
-    ["הוצאות רכב בחו\"ל", "קבלה על דלק עם פירוט כמות ומחיר לגלון/ליטר. חל איסור על תדלוק בחברת השכרת הרכב. כן קבלות מסוג re-paid. קבלה על חניה בחו\"ל, כבישי אגרה."],
-    ["תחבורה ל/מ שדה התעופה בארץ", "מוניות בארץ כנגד קבלה. חניה בשדה עד 50 ₪ ליום."],
-    ["תחבורה ל/מ שדה התעופה בחו\"ל", "מוניות כנגד קבלה, תחבורה ציבורית לצורכי עבודה בלבד. יש לציין את היעד והמטרה. כאשר משולבת חופשה פרטית, החזר המונית אל/מ שדה התעופה יתבצע כאשר אין שינוי במקום התפקיד."],
-    ["אחר", "באישור מראש: כנס, קורס, מזוודה."]
+  // ---------- שדות פרטי הנוסע (משותפים לשני הטפסים) ----------
+  function travelerFields() {
+    return `<div class="form-grid">
+      <label class="field">שם הנוסע/ת<input data-f="name" autocomplete="name"></label>
+      <label class="field">מספר תעודת זהות<input data-f="id" inputmode="numeric"></label>
+      <label class="field">דרגה / תפקיד<input data-f="rank"></label>
+      <label class="field">מס' נייד<input data-f="phone" inputmode="tel" autocomplete="tel"></label>
+      <label class="field">כתובת מייל<input data-f="email" type="email" autocomplete="email"></label>
+      <label class="field">יעד<input data-f="dest"></label>
+      <label class="field">תאריך יציאה מהארץ<input type="date" data-f="out"></label>
+      <label class="field">שעת המראה<input type="time" data-f="outTime"></label>
+      <label class="field">תאריך חזרה לארץ<input type="date" data-f="back"></label>
+      <label class="field">שעת נחיתה<input type="time" data-f="backTime"></label>
+    </div>`;
+  }
+  const val = (box, n) => { const el = box.querySelector(`[data-f="${n}"]`); return el ? (el.value || "").trim() : ""; };
+  const checked = (box, n) => { const el = box.querySelector(`[data-f="${n}"]`); return !!(el && el.checked); };
+  function travelerLines(box) {
+    const v = n => val(box, n);
+    return [
+      `שם: ${v("name")} | ת"ז: ${v("id")}`,
+      v("rank") ? `דרגה/תפקיד: ${v("rank")}` : "",
+      v("phone") || v("email") ? `נייד: ${v("phone")}${v("email") ? ` | מייל: ${v("email")}` : ""}` : "",
+      v("dest") ? `יעד: ${v("dest")}` : "",
+      v("out") ? `יציאה: ${fmt(v("out"))} ${v("outTime")}`.trim() : "",
+      v("back") ? `חזרה: ${fmt(v("back"))} ${v("backTime")}`.trim() : ""
+    ].filter(Boolean);
+  }
+  function openWhatsApp(text) { window.open(`https://wa.me/${waNumber()}?text=${encodeURIComponent(text)}`, "_blank", "noopener"); }
+  function say(box, text, ok) { const m = box.querySelector("[data-msg]"); m.className = "msg " + (ok ? "ok" : "bad"); m.textContent = text; }
+
+  // ---------- מקדמה ----------
+  const ADV_TITLE = "מקדמה מזומן / הקצאה בכרטיס אשראי עבור נסיעה בתפקיד";
+  const ADV_REQUEST = 'אבקש ממשרד הביטחון להעביר לי הרשאה למשיכת מזומן/כרטיס אשראי עבור שהותי בתפקיד בחו"ל עפ"י הקצובה שנקבעה ע"י החשכ"ל.';
+  const ADV_TERMS = [
+    'אני מתחייב/ת להתחשבן בצירוף קבלות ע"י סריקה באפליקציית כאל בהתאם להנחיות שהועברו למתן כרטיס אשראי, או במקרים חריגים של מזומן ע"י סריקה למייל חט\' נסיעות חו"ל.',
+    "אני מתחייב/ת להצהיר על ארוחות רשמיות שהוזמנתי בעת ההתחשבנות בגמר הנסיעה.",
+    'אני מתחייב/ת לבצע התחשבנות עד 30 יום מתאריך הגעתי ארצה, אחרת ההתחשבנות תתבצע חד צדדית ע"י חטיבת חשבונות חו"ל/אגף הכספים משהב"ט.',
+    'ידוע לי שיתרת חובה לגבייה תתבצע ע"י חיוב כרטיס האשראי האישי בשקלים, בהתאם לשער המטבע היציג ביום הנסיעה, ויתרה לזכותי תועבר לחשבון הבנק אשר בבעלותי. מצ"ב צילום כרטיס האשראי האישי משני צדדיו.',
+    "ידוע לי שאני אחראי/ת באופן אישי לכסף אשר בחרתי לקחת במזומן, ושאין ביטוח על מזומנים שקיבלתי ולא אפוצה על אובדן או גניבה. עליי חלה אחריות אישית לשמירתם.",
+    'אני מתחייב/ת, במידה והנסיעה תבוטל לאחר קבלת המקדמה, להחזיר את המקדמה במלואה במיידי/להעביר בקשה לביטול הקצאת האשראי, אחרת ייגבה מכרטיס האשראי האישי שלי בהתאם לשער המטבע היציג ביום הנסיעה. היה ולא ניתן יהיה לגבות באמצעות כרטיס האשראי, אני מאשר/ת כי סכום החוב יקוזז ממשכורת משרד הביטחון/צה"ל, ואני ממחה את זכויותיי במשכורתי בגובה החוב לטובת משרד הביטחון.',
+    'אני מתחייב/ת שלא לקבל כל הטבות/העדפות/פיצוי בטיסה ושום זכויות הנובעות ו/או העשויות לנבוע מנסיעה זו, כולל "הנוסע המתמיד" של חברת אל על או של כל חברה אחרת, וכל זיכוי כספי או שווה ערך כספי שיינתן לי ע"י חברת התעופה מכל סיבה שהיא, ואף לא בגלל שינוי מסלול או דחיית טיסה או כל סיבה אחרת מרצון או מאילוץ. כל זכות כזו אני ממחה למשהב"ט לכל שימוש שימצא לנכון.'
   ];
-  const DECLARATION = "אני החתום/ה מטה מצהיר/ה בזאת כי הקבלות וההוצאות שהצגתי בפני אגף הכספים/חטיבת פרט והסדרי נסיעות חו\"ל הינן הוצאות שהוצאו בפועל במסגרת נסיעתי בתפקיד בלבד. הנני מודע/ת לכך כי במקרה שהפרטים הנ\"ל אינם נכונים אדרש להשיב את הכספים ששולמו לי ביתר ועלול/ה להיפתח נגדי הליך משמעתי.";
-  function addMonth(d) { const x = parse(d); if (!x) return null; const y = new Date(x); y.setMonth(y.getMonth() + 1); return y; }
+  const ADV_VACATION = [
+    "ידוע לי שאם אצא לחופשה פרטית במסגרת נסיעה זו, לא תאושר לי שום עלות בתקופת החופשה, בכלל זה הלינה וההוצאות הנלוות ביום הראשון/האחרון של מילוי התפקיד, אלא דמי שהייה בלבד בהתאם לימי התפקיד.",
+    'ידוע לי שככלל, כל חופשה בטרם או לאחר מילוי תפקיד עשויה לגרום לשינויים בזכאותי, ומשהב"ט לא יישא באחריות ובתשלומים בגין כל הוצאה שנגרמה בגין לקיחת חופשה, כגון: בתי מלון, השכרת רכב, מוניות, שינויים/ביטולים של טיסות ועוד. באחריותי ועל חשבוני לבצע השלמה לתקופת החופשה של ביטוח רפואי ומטען. ידוע לי שקיימת אפשרות לבצע השלמה זו ישירות מול פספורטכארד.',
+    "במידה והנסיעה תבוטל, או ישונו היעדים, אני מתחייב/ת לשאת בכל הוצאות הנסיעה הקשורות לחופשה."
+  ];
+  const ADV_DECL = "אני מצהיר/ה בזאת כי קראתי ואני מאשר/ת את תוכן מסמך זה.";
+  const ADV_POA = "אני מייפה את כוחו/ה לקחת בשמי ובמקומי את שובר המקדמה לבנק ולמשוך עבורי את הכסף מהבנק. בזאת, אני לוקח/ת את האחריות על השובר והכסף ולא תהיה לי כל טענה למשרד הביטחון בעניין.";
+
+  function advanceHtml() {
+    return `
+      <div class="callout warn"><b>יש לצרף לטופס:</b><ul><li>צילום כרטיס האשראי האישי משני הצדדים</li><li>טופס ניהול חשבון</li></ul></div>
+      <details class="fold"><summary>1. קריאת הטופס לפני המילוי</summary><div class="in">
+        <div class="paper">
+          <p>אל: משרד הביטחון – אגף הכספים</p>
+          <h4>${esc(ADV_TITLE)}</h4>
+          <p>שם הנוסע/ת, מספר תעודת זהות, יעד, תאריך יציאה מהארץ, שעת המראה, תאריך חזרה לארץ, שעת נחיתה, דרגה/תפקיד, מס' נייד, כתובת מייל.</p>
+          <p>${esc(ADV_REQUEST)}</p>
+          <ol>${ADV_TERMS.map(t => `<li>${esc(t)}</li>`).join("")}</ol>
+          <p class="sub">חופשה פרטית במסגרת הנסיעה</p>
+          <ol start="${ADV_TERMS.length + 1}">${ADV_VACATION.map(t => `<li>${esc(t)}</li>`).join("")}</ol>
+          <p><b>${esc(ADV_DECL)}</b></p>
+          <p>תאריך, שם פרטי ומשפחה, חתימה.</p>
+          <p class="sub">ייפוי כוח (במידה והכסף נמשך עבורי באמצעות אדם אחר)</p>
+          <p>אני (שם ות"ז) מייפה את כוחו של (שם ות"ז) ${esc(ADV_POA.replace("אני מייפה את כוחו/ה ", ""))}</p>
+          <p>חתימת הנוסע/ת, חתימת המיופה/ה.</p>
+        </div>
+      </div></details>
+      <details class="fold" open><summary>2. מילוי מקוון</summary><div class="in" data-form="advance">
+        ${travelerFields()}
+        <p class="section-title">סוג המקדמה</p>
+        <div class="choice">
+          <label><input type="radio" name="advType" value="הקצאה בכרטיס אשראי" checked> הקצאה בכרטיס אשראי</label>
+          <label><input type="radio" name="advType" value="מזומן"> מזומן</label>
+        </div>
+        <p class="section-title">חופשה פרטית במסגרת הנסיעה</p>
+        <div class="choice">
+          <label><input type="radio" name="vac" value="לא" checked> לא</label>
+          <label><input type="radio" name="vac" value="כן"> כן</label>
+        </div>
+        <div class="form-grid" data-vac hidden style="margin-top:10px">
+          <label class="field">חופשה מתאריך<input type="date" data-f="vacFrom"></label>
+          <label class="field">עד תאריך<input type="date" data-f="vacTo"></label>
+        </div>
+        <label class="check"><input type="checkbox" data-f="poa"><span>הכסף יימשך עבורי באמצעות אדם אחר (ייפוי כוח)</span></label>
+        <div class="poa form-grid" data-poa hidden>
+          <label class="field">שם המיופה/ה<input data-f="poaName"></label>
+          <label class="field">ת"ז המיופה/ה<input data-f="poaId" inputmode="numeric"></label>
+        </div>
+        <label class="check"><input type="checkbox" data-f="decl"><span>קראתי את כל סעיפי הטופס, כולל ההתחייבויות וסעיפי החופשה. ${esc(ADV_DECL)}</span></label>
+        <div class="row-btns">
+          <button class="btn wa" data-send="advance">שליחה בוואטסאפ</button>
+          <button class="btn quiet" data-print="advance">הדפסה / שמירה כ-PDF</button>
+          <span data-msg></span>
+        </div>
+        <p class="fine">הטופס לא נשמר באתר. אחרי השליחה מצרפים בצ'אט את צילום כרטיס האשראי ואת טופס ניהול החשבון. אם נדרש טופס חתום, מדפיסים את הטופס הממולא, חותמים ושולחים סריקה.</p>
+      </div></details>`;
+  }
+  function advanceText(box) {
+    const type = box.querySelector('input[name="advType"]:checked').value;
+    const vac = box.querySelector('input[name="vac"]:checked').value;
+    const lines = [`*${ADV_TITLE}*`, `תאריך: ${fmtD(today())}`, ...travelerLines(box), `סוג המקדמה: ${type}`,
+      `חופשה פרטית במסגרת הנסיעה: ${vac}${vac === "כן" && (val(box, "vacFrom") || val(box, "vacTo")) ? ` (${fmt(val(box, "vacFrom"))} – ${fmt(val(box, "vacTo"))})` : ""}`];
+    if (checked(box, "poa")) lines.push(`ייפוי כוח: ${val(box, "poaName")}, ת"ז ${val(box, "poaId")}`);
+    lines.push("", `✓ ${ADV_DECL}`, `חתימה: ${val(box, "name")}`, "", "מצורפים בהודעות הבאות: צילום כרטיס אשראי אישי משני הצדדים, טופס ניהול חשבון.");
+    return lines.join("\n");
+  }
+  function advancePrint(box) {
+    const v = n => esc(val(box, n));
+    const type = box.querySelector('input[name="advType"]:checked').value;
+    const vac = box.querySelector('input[name="vac"]:checked').value;
+    const row = (k, x) => `<tr><td class="k">${k}</td><td>${x}</td></tr>`;
+    return `<p>תאריך: ${fmtD(today())}</p><p>אל: משרד הביטחון – אגף הכספים</p>
+      <h1>${esc(ADV_TITLE)}</h1>
+      <table>${row("שם הנוסע/ת", v("name"))}${row("מספר תעודת זהות", v("id"))}${row("דרגה / תפקיד", v("rank"))}${row("מס' נייד", v("phone"))}${row("כתובת מייל", v("email"))}${row("יעד", v("dest"))}
+        ${row("יציאה מהארץ", `${fmt(val(box, "out"))} ${v("outTime")}`)}${row("חזרה לארץ", `${fmt(val(box, "back"))} ${v("backTime")}`)}${row("סוג המקדמה", esc(type))}
+        ${row("חופשה פרטית", esc(vac) + (vac === "כן" ? ` ${fmt(val(box, "vacFrom"))} – ${fmt(val(box, "vacTo"))}` : ""))}</table>
+      <p>${esc(ADV_REQUEST)}</p>
+      <ol>${ADV_TERMS.concat(ADV_VACATION).map(t => `<li>${esc(t)}</li>`).join("")}</ol>
+      <p><b>${esc(ADV_DECL)}</b></p>
+      <div class="sig"><div><b>${fmtD(today())}</b>תאריך</div><div><b>${v("name")}</b>שם פרטי ומשפחה</div><div><b>&nbsp;</b>חתימה</div></div>
+      ${checked(box, "poa") ? `<p style="margin-top:18pt"><b>ייפוי כוח:</b> אני ${v("name")} (ת"ז ${v("id")}) מייפה את כוחו/ה של ${v("poaName")} (ת"ז ${v("poaId")}) לקחת בשמי ובמקומי את שובר המקדמה לבנק ולמשוך עבורי את הכסף מהבנק. בזאת, אני לוקח/ת את האחריות על השובר והכסף ולא תהיה לי כל טענה למשרד הביטחון בעניין.</p>
+        <div class="sig"><div><b>&nbsp;</b>חתימת הנוסע/ת</div><div><b>&nbsp;</b>חתימת המיופה/ה</div></div>` : ""}
+      <p style="margin-top:14pt">מצורף: צילום כרטיס האשראי האישי משני צדדיו, טופס ניהול חשבון.</p>`;
+  }
+
+  // ---------- התחשבנות ----------
+  const EXPENSES = ["כלכלה", "לינה", 'הוצאות רכב בחו"ל', "תחבורה ל/מ שדה התעופה בארץ", 'תחבורה ל/מ שדה התעופה בחו"ל', "אחר"];
+  const SETTLE_DECL = 'אני החתום/ה מטה מצהיר/ה בזאת כי הקבלות וההוצאות שהצגתי בפני אגף הכספים/חטיבת פרט והסדרי נסיעות חו"ל הינן הוצאות שהוצאו בפועל במסגרת נסיעתי בתפקיד בלבד. הנני מודע/ת לכך כי במקרה שהפרטים הנ"ל אינם נכונים אדרש להשיב את הכספים ששולמו לי ביתר ועלול/ה להיפתח נגדי הליך משמעתי.';
   function expRow() {
     return `<div class="exp">
-      <select data-e="type" aria-label="סוג ההוצאה">${EXPENSES.map(e => `<option>${esc(e[0])}</option>`).join("")}</select>
+      <select data-e="type" aria-label="סוג ההוצאה">${EXPENSES.map(e => `<option>${esc(e)}</option>`).join("")}</select>
       <input type="date" data-e="date" aria-label="תאריך">
       <input type="number" min="0" step="0.01" data-e="amount" placeholder="סכום" aria-label="סכום">
       <select data-e="cur" aria-label="מטבע"><option>₪</option><option>$</option><option>€</option><option>£</option><option>אחר</option></select>
@@ -369,383 +370,132 @@
       </div>
     </div>`;
   }
-  function settlementHtml(t, k, i) {
-    const due = addMonth(t.end || t.start);
-    const now = today();
-    let dueText = "";
-    if (due) {
-      const left = Math.round((due - now) / 86400000);
-      const dueFmt = due.toLocaleDateString("he-IL", { day: "numeric", month: "numeric", year: "numeric" });
-      dueText = left < 0 ? `<div class="callout bad">המועד להגשת ההתחשבנות עבר (${dueFmt}).</div>`
-        : `<div class="callout">את ההתחשבנות ניתן להגיש עד חודש מיום החזרה, כלומר <b>עד ${dueFmt}</b>${i.past ? `, נשארו ${left} ימים` : ""}.</div>`;
-    }
-    return `<div class="block" data-settle="${k}">
-      <h4>התחשבנות לאחר הנסיעה</h4>
-      ${dueText}
-      <div class="callout warn"><b>יש לצרף בנוסף לטופס:</b>
-        <ul><li>קבלות סרוקות</li><li>אישור ניהול חשבון בנק</li><li>צילום כרטיס אשראי משני הצדדים</li></ul>
-      </div>
+  function settleHtml() {
+    return `
+      <div class="callout" data-due>את ההתחשבנות מגישים <b>עד חודש מיום החזרה ארצה</b>. אחרי שממלאים את תאריך החזרה, יופיע כאן המועד האחרון.</div>
+      <div class="callout warn"><b>יש לצרף בנוסף לטופס:</b><ul><li>קבלות סרוקות</li><li>אישור ניהול חשבון בנק</li><li>צילום כרטיס אשראי משני הצדדים</li></ul></div>
       <details class="fold"><summary>1. קריאת הטופס לפני המילוי</summary><div class="in">
         <a class="form-img" href="settlement-form.jpg" target="_blank" rel="noopener" title="פתיחת הטופס בגודל מלא">
           <img src="settlement-form.jpg" alt="טופס התחשבנות לאחר נסיעת חו&quot;ל בתפקיד" loading="lazy">
         </a>
         <div class="row-btns">
-          <a class="ghost" href="settlement-form.jpg" target="_blank" rel="noopener">הגדלת הטופס</a>
-          <a class="ghost" href="settlement-form.pdf" target="_blank" rel="noopener" download>הורדת הטופס (PDF)</a>
+          <a class="btn line" href="settlement-form.jpg" target="_blank" rel="noopener">הגדלת הטופס</a>
+          <a class="btn line" href="settlement-form.pdf" target="_blank" rel="noopener" download>הורדת הטופס (PDF)</a>
         </div>
       </div></details>
-      <details class="fold"><summary>2. מילוי מקוון ושליחה בוואטסאפ</summary><div class="in">
-        <div class="form-grid">
-          <label class="field">שם הנוסע/ת<input data-f="name" list="people-${k}"></label>
-          <label class="field">מספר תעודת זהות<input data-f="id" inputmode="numeric"></label>
-          <label class="field">דרגה / תפקיד<input data-f="rank"></label>
-          <label class="field">אגף<input data-f="unit"></label>
-          <label class="field">מס' נייד<input data-f="phone" inputmode="tel"></label>
-          <label class="field">כתובת מייל<input data-f="email" type="email"></label>
-          <label class="field">יעד<input data-f="dest" value="${esc(t.destination || "")}"></label>
-          <label class="field">נמשכה מקדמה בסכום של<input data-f="advance" inputmode="decimal"></label>
-          <label class="field">תאריך יציאה מהארץ<input type="date" data-f="out" value="${esc(t.start || "")}"></label>
-          <label class="field">שעת המראה<input type="time" data-f="outTime"></label>
-          <label class="field">תאריך חזרה לארץ<input type="date" data-f="back" value="${esc(t.end || "")}"></label>
-          <label class="field">שעת נחיתה<input type="time" data-f="backTime"></label>
+      <details class="fold" open><summary>2. מילוי מקוון</summary><div class="in" data-form="settle">
+        ${travelerFields()}
+        <div class="form-grid" style="margin-top:10px"><label class="field">נמשכה מקדמה בסכום של<input data-f="advance" inputmode="decimal"></label></div>
+        <p class="section-title">ההוצאות בפועל לזמן השהות בתפקיד בלבד</p>
+        <div class="exp-list" data-exps>${expRow()}</div>
+        <div class="row-btns"><button type="button" class="ghost" data-add>+ הוספת הוצאה</button><span class="total" data-total></span></div>
+        <label class="check"><input type="checkbox" data-f="decl"><span>${esc(SETTLE_DECL)}</span></label>
+        <div class="row-btns">
+          <button class="btn wa" data-send="settle">שליחה בוואטסאפ</button>
+          <span data-msg></span>
         </div>
-        <datalist id="people-${k}">${(t.participants || []).map(p => `<option value="${esc(p.name)}">`).join("")}</datalist>
-        <div class="exp-list" data-f="exps">${expRow()}</div>
-        <div class="row-btns"><button type="button" class="ghost" data-add>+ הוספת הוצאה</button><span class="total" data-f="total"></span></div>
-        <label class="check"><input type="checkbox" data-f="decl"><span>${esc(DECLARATION)}</span></label>
-        <div class="row-btns"><button type="button" class="wa" data-wa="${k}">שליחה בוואטסאפ</button><span class="form-msg" data-f="msg"></span></div>
-        <p class="fine">הטופס לא נשמר באתר. אחרי השליחה מצרפים בצ'אט של הוואטסאפ את הקבלות הסרוקות, אישור ניהול החשבון וצילום כרטיס האשראי.</p>
-      </div></details>
-    </div>`;
+        <p class="fine">הטופס לא נשמר באתר. אחרי השליחה מצרפים בצ'אט את הקבלות הסרוקות, אישור ניהול החשבון וצילום כרטיס האשראי.</p>
+      </div></details>`;
   }
   function expData(row) {
     const g = n => row.querySelector(`[data-e="${n}"]`);
     return { type: g("type").value, date: g("date").value, amount: parseFloat(g("amount").value) || 0, cur: g("cur").value, note: g("note").value.trim(),
              meals: ["m1", "m2", "m3"].filter(m => g(m).checked).map(m => ({ m1: "בוקר", m2: "צהריים", m3: "ערב" })[m]) };
   }
-  function refreshForm(box) {
+  function refreshSettle(box) {
     box.querySelectorAll(".exp").forEach(r => { r.querySelector(".meals").hidden = r.querySelector('[data-e="type"]').value !== "כלכלה"; });
     const sums = {};
     box.querySelectorAll(".exp").forEach(r => { const e = expData(r); if (e.amount) sums[e.cur] = (sums[e.cur] || 0) + e.amount; });
     const parts = Object.entries(sums).map(([c, v]) => `${v.toLocaleString("he-IL")} ${c}`);
-    box.querySelector('[data-f="total"]').textContent = parts.length ? `סה"כ: ${parts.join(" + ")}` : "";
+    box.querySelector("[data-total]").textContent = parts.length ? `סה"כ: ${parts.join(" + ")}` : "";
+    const back = parse(val(box, "back")), due = document.querySelector("[data-due]");
+    if (back && due) {
+      const d = new Date(back); d.setMonth(d.getMonth() + 1);
+      const left = Math.round((d - today()) / 86400000);
+      due.className = "callout" + (left < 0 ? " bad" : "");
+      due.innerHTML = left < 0 ? `המועד להגשת ההתחשבנות עבר (${fmtD(d)}).` : `את ההתחשבנות מגישים <b>עד ${fmtD(d)}</b>, חודש מיום החזרה${left <= 31 ? `. נשארו ${left} ימים` : ""}.`;
+    }
   }
-  function sendWhatsApp(box, t) {
-    const f = n => (box.querySelector(`[data-f="${n}"]`).value || "").trim();
-    const msg = box.querySelector('[data-f="msg"]');
-    if (!f("name") || !f("id")) { msg.className = "form-msg bad"; msg.textContent = "חסרים שם ומספר תעודת זהות."; return; }
-    if (!box.querySelector('[data-f="decl"]').checked) { msg.className = "form-msg bad"; msg.textContent = "יש לסמן את ההצהרה לפני השליחה."; return; }
-    const d = v => v ? fmt(v) : "";
-    const lines = [
-      `*התחשבנות לאחר נסיעת חו"ל בתפקיד*`,
-      `נסיעה: ${t.name}`,
-      `שם: ${f("name")} | ת"ז: ${f("id")}`,
-      f("rank") || f("unit") ? `דרגה/תפקיד: ${f("rank")}${f("unit") ? ` | אגף: ${f("unit")}` : ""}` : "",
-      f("phone") || f("email") ? `נייד: ${f("phone")}${f("email") ? ` | מייל: ${f("email")}` : ""}` : "",
-      f("dest") ? `יעד: ${f("dest")}` : "",
-      `יציאה: ${d(f("out"))} ${f("outTime")}`.trim(),
-      `חזרה: ${d(f("back"))} ${f("backTime")}`.trim(),
-      f("advance") ? `נמשכה מקדמה בסכום של: ${f("advance")}` : "נמשכה מקדמה: לא צוין",
-      "",
-      "*הוצאות:*"
-    ].filter(x => x !== "");
+  function settleText(box) {
+    const lines = [`*התחשבנות לאחר נסיעת חו"ל בתפקיד*`, `תאריך: ${fmtD(today())}`, ...travelerLines(box),
+      val(box, "advance") ? `נמשכה מקדמה בסכום של: ${val(box, "advance")}` : "נמשכה מקדמה: לא צוין", "", "*הוצאות:*"];
     const exps = [...box.querySelectorAll(".exp")].map(expData).filter(e => e.amount || e.meals.length || e.note || e.date);
     if (!exps.length) lines.push("אין הוצאות");
-    exps.forEach(e => lines.push(`• ${e.type}${e.date ? ` | ${d(e.date)}` : ""}${e.amount ? ` | ${e.amount.toLocaleString("he-IL")} ${e.cur}` : ""}${e.meals.length ? ` | ארוחות לקיזוז: ${e.meals.join(", ")}` : ""}${e.note ? ` | ${e.note}` : ""}`));
-    const total = box.querySelector('[data-f="total"]').textContent;
-    if (total) lines.push(total);
-    lines.push("", "✓ הצהרתי כי ההוצאות הוצאו בפועל במסגרת נסיעתי בתפקיד בלבד.", `חתימה: ${f("name")}`,
-      "", "מצורפים בהודעות הבאות: קבלות סרוקות, אישור ניהול חשבון בנק, צילום כרטיס אשראי משני הצדדים.");
-    const text = lines.join("\n");
-    const num = typeof SETTLEMENT_WHATSAPP !== "undefined" ? String(SETTLEMENT_WHATSAPP).replace(/\D/g, "") : "";
-    window.open(`https://wa.me/${num}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
-    msg.className = "form-msg ok"; msg.textContent = "נפתח וואטסאפ. לא לשכוח לצרף את הקבצים.";
+    exps.forEach(e => lines.push(`• ${e.type}${e.date ? ` | ${fmt(e.date)}` : ""}${e.amount ? ` | ${e.amount.toLocaleString("he-IL")} ${e.cur}` : ""}${e.meals.length ? ` | ארוחות לקיזוז: ${e.meals.join(", ")}` : ""}${e.note ? ` | ${e.note}` : ""}`));
+    const total = box.querySelector("[data-total]").textContent; if (total) lines.push(total);
+    lines.push("", "✓ הצהרתי כי ההוצאות הוצאו בפועל במסגרת נסיעתי בתפקיד בלבד.", `חתימה: ${val(box, "name")}`, "", "מצורפים בהודעות הבאות: קבלות סרוקות, אישור ניהול חשבון בנק, צילום כרטיס אשראי משני הצדדים.");
+    return lines.join("\n");
   }
 
-  function peopleTable(people) {
-    const box = (v, label) => `<span class="box ${isYes(v) ? "yes" : ""}" role="img" aria-label="${label} ${isYes(v) ? "יש" : "אין"}">${isYes(v) ? "✓" : ""}</span>`;
-    return `<table class="people"><thead><tr><th>שם</th><th>ויזה</th><th>מקדמה</th><th>התחשבנות</th></tr></thead><tbody>${
-      people.map(p => `<tr><td>${esc(p.name)}</td><td>${box(p.visa, "ויזה")}</td><td>${box(p.advance, "מקדמה")}</td><td>${box(p.settlement, "התחשבנות")}</td></tr>`).join("")
-    }</tbody></table>`;
-  }
-
-  function stepsList(i) {
-    let html = "", lastRound = null, num = 0;
-    i.steps.forEach(s => {
-      if ((s.round || "") !== lastRound) {
-        if (s.round) { html += `<li class="round-name" style="--c:${roundColor(s.round)}">${esc(s.round)}</li>`; num = 0; }
-        lastRound = s.round || "";
-      }
-      num++;
-      const c = statusClass(s.status);
-      html += `<li class="step" style="--c:${roundColor(s.round)}"><span class="n ${c === "ok" ? "ok" : ""}">${num}</span>${esc(s.role)}<span class="pill ${c}">${esc(s.status || "ממתין")}${s.date ? " " + fmt(s.date) : ""}</span></li>`;
-    });
-    return `<ul class="steps">${html}</ul>`;
-  }
-
-  function cardHtml(t, k) {
-    const i = info(t);
-    const when = [t.start ? `${fmt(t.start)} – ${fmt(t.end)}` : "חסר תאריך", t.destination].filter(Boolean);
-    let cd;
-    if (i.past) cd = `<div class="count-down done"><b>הסתיימה</b></div>`;
-    else if (i.during) cd = `<div class="count-down"><b>✈</b><small>בנסיעה עכשיו</small></div>`;
-    else if (i.days !== null) cd = `<div class="count-down"><b>${i.days}</b><small>${i.days === 1 ? "יום ליציאה" : "ימים ליציאה"}</small></div>`;
-    else cd = "";
-    const miss = [i.missA ? (i.missA === 1 ? "חסר אישור אחד" : `חסרים ${i.missA} אישורים`) : "",
-                  i.missD ? (i.missD === 1 ? "חסר מסמך אחד" : `חסרים ${i.missD} מסמכים`) : ""].filter(Boolean).join(", ");
-    const left = i.days <= 0 ? "היציאה היום" : i.days === 1 ? "היציאה מחר" : `נשארו ${i.days} ימים ליציאה`;
-    const alert = i.hot ? `<div class="alert">⚠ ${left}${miss ? ", " + miss : ""}</div>` : "";
-    const chips = [
-      i.docs.length ? `<span class="chip ${i.missD ? "no" : "ok"}">מסמכים ${i.docsReady}/${i.docs.length}</span>` : "",
-      i.people.length ? `<span class="chip ${i.visas < i.people.length ? "no" : "ok"}">ויזות ${i.visas}/${i.people.length}</span>` : "",
-      i.people.length ? `<span class="chip ${i.advances < i.people.length ? "no" : "ok"}">מקדמות ${i.advances}/${i.people.length}</span>` : "",
-      i.people.length ? `<span class="chip ${i.settled === i.people.length ? "ok" : i.past ? "no" : ""}">התחשבנות ${i.settled}/${i.people.length}</span>` : "",
-      i.summarySent ? `<span class="chip ok">סיכום נסיעה נשלח</span>` : i.past ? `<span class="chip no">חסר סיכום נסיעה</span>` : ""
-    ].join("");
-    const upload = typeof PASSPORT_UPLOAD_LINK !== "undefined" && PASSPORT_UPLOAD_LINK
-      ? `<a class="btn" href="${esc(PASSPORT_UPLOAD_LINK)}" target="_blank" rel="noopener">העלאת דרכון</a>` : "";
-    const isOpen = opened.has(k);
-    return `
-      <article class="card ${i.hot ? "hot" : ""} ${isOpen ? "expanded" : ""}" data-k="${k}">
-        <div class="card-main" role="button" tabindex="0" aria-expanded="${isOpen}" data-toggle="${k}">
-          <div class="top">
-            <div><h3>${esc(t.name)}</h3><div class="when">${when.map(w => `<span>${esc(w)}</span>`).join("")}</div></div>
-            ${cd}
-          </div>
-          ${routeHtml(t, i, k)}
-          ${statusLine(i)}
-          ${roundsLine(i)}
-          ${chips ? `<div class="chips">${chips}</div>` : ""}
-          ${alert}
-          <span class="more-hint">${isOpen ? "הסתרת הפרטים" : "לחיצה לפרטים המלאים"}</span>
-        </div>
-        <div class="details">
-          <div>
-            <h4>משתתפים</h4>
-            ${i.people.length ? peopleTable(i.people) : `<p class="when">לא הוזנו משתתפים</p>`}
-            ${upload}
-            <h4 style="margin-top:18px">מסמכים</h4>
-            ${i.docs.length ? checklist(i.docs.map(d => ({ label: d.name, yes: isYes(d.ready), y: "מוכן", n: "חסר" }))) : `<p class="when">אין מסמכים ברשימה</p>`}
-          </div>
-          <div>
-            <h4>אישורים</h4>
-            ${stepsList(i)}
-          </div>
-          ${t.notes ? `<div class="wide"><h4>הערות</h4><div class="notes">${esc(t.notes)}</div></div>` : ""}
-          ${calcHtml(t, k)}
-          ${settlementHtml(t, k, i)}
-          <div class="block"><div class="summary-row ${i.summarySent ? "yes" : "no-yet"}"><span class="box" aria-hidden="true">${i.summarySent ? "✓" : ""}</span>${i.summarySent ? "נשלח סיכום נסיעה" : "טרם נשלח סיכום נסיעה"}</div></div>
-          <div class="share"><button data-share="${k}">העתקת קישור לנסיעה הזאת</button><small id="share-${k}">מי שיקבל את הקישור יראה רק את הנסיעה הזאת</small></div>
-        </div>
-      </article>`;
-  }
-
+  // ---------- ניווט ----------
   function render() {
+    const id = location.hash.replace("#", "");
+    const d = DOCS.find(x => x.id === id);
     const app = document.getElementById("app");
-    if (loadProblem) {
-      app.innerHTML = `<div class="problem"><h2>האתר לא הצליח לקרוא את הנתונים</h2><p>${esc(loadProblem)}</p></div>`;
-      return;
-    }
-    const only = new URLSearchParams(location.search).get("t");
-    if (only !== null) {
-      const k = trips.findIndex(t => t.name === only);
-      document.getElementById("filter").hidden = true;
-      document.querySelector("header.page h1").textContent = k >= 0 ? "פרטי נסיעה" : "הנסיעה לא נמצאה";
-      if (k < 0) { app.innerHTML = `<div class="problem"><h2>לא מצאתי נסיעה בשם הזה</h2><p>ייתכן שהשם של הנסיעה השתנה. כדאי לבקש קישור חדש.</p></div>`; return; }
-      opened.add(k);
-      app.innerHTML = `<div class="single" style="margin-top:22px">${cardHtml(trips[k], k)}</div>`;
-      document.title = trips[k].name;
-      return;
-    }
-    const GROUP_LINKS = { mashab: TYPES[0], nasah: TYPES[1], shlichim: TYPES[2] };
-    const lockedType = GROUP_LINKS[new URLSearchParams(location.search).get("g")];
-    if (lockedType) { filter = lockedType; document.querySelector("header.page h1").textContent = (lockedType === "שליחים" ? "שליחים" : `נסיעות ${lockedType}`); }
-    const byType = TYPES.map(type => ({ type, list: trips.map((t, k) => [t, k]).filter(([t]) => (t.type || TYPES[0]) === type) }));
-    const f = document.getElementById("filter");
-    f.hidden = !!lockedType;
-    f.innerHTML = [`<button aria-pressed="${filter === "הכול"}" data-filter="הכול">הכול</button>`]
-      .concat(byType.map(g => `<button aria-pressed="${filter === g.type}" data-filter="${esc(g.type)}">${esc(g.type)} ${g.list.length}</button>`)).join("");
+    if (!d) { app.innerHTML = libraryHtml(); document.title = "מאגר מסמכים – נסיעות בתפקיד"; return; }
+    const body = id === "calc" ? calcHtml() : id === "advance" ? `<section class="panel">${advanceHtml()}</section>` : `<section class="panel">${settleHtml()}</section>`;
+    app.innerHTML = docHead(d) + body;
+    document.title = d.title;
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener("hashchange", render);
 
-    app.innerHTML = byType.filter(g => filter === "הכול" || filter === g.type).map(g => {
-      const sorted = sortTrips(g.list.map(([t]) => t)).map(t => g.list.find(([x]) => x === t));
-      const active = sorted.filter(([t]) => !info(t).past), past = sorted.filter(([t]) => info(t).past);
-      const body = active.length ? active.map(([t, k]) => cardHtml(t, k)).join("")
-        : `<div class="empty">${PLANE}${g.type === "שליחים" ? "אין כרגע שליחים" : `אין כרגע נסיעות ${esc(g.type)}`}</div>`;
-      const pastHtml = past.length ? `<details class="past"><summary>${past.length === 1 ? "נסיעה אחת שהסתיימה" : `${past.length} נסיעות שהסתיימו`}</summary>${past.map(([t, k]) => cardHtml(t, k)).join("")}</details>` : "";
-      return `<section class="group"><div class="group-head"><h2>${esc(g.type)}</h2><span class="count">${active.length} ${active.length === 1 ? "נסיעה" : "נסיעות"}</span></div>${body}${pastHtml}</section>`;
-    }).join("") + (unassigned.length && !lockedType ? `<p class="unassigned">⚠ בלשונית המשתתפים יש שמות של נסיעות שלא נמצאו: ${unassigned.map(esc).join(", ")}. כדאי לבדוק שהשם כתוב בדיוק כמו בלשונית הנסיעות.</p>` : "");
+  function copyLink(id, done) {
+    const url = docUrl(id);
+    const ok = () => { const el = document.querySelector(`[data-copied="${id}"]`); if (el) { el.textContent = "הקישור הועתק"; setTimeout(() => el.textContent = "", 2500); } };
+    if (navigator.clipboard) navigator.clipboard.writeText(url).then(ok, () => window.prompt("העתיקו את הקישור:", url));
+    else window.prompt("העתיקו את הקישור:", url);
   }
 
   document.addEventListener("click", e => {
-    const fb = e.target.closest("[data-filter]");
-    if (fb) { filter = fb.dataset.filter; render(); return; }
-    const stop = e.target.closest("[data-stop]");
-    if (stop) {
-      e.stopPropagation();
-      const [k] = stop.dataset.stop.split(":");
-      document.querySelectorAll(`[data-k="${k}"] [data-stop]`).forEach(s => s.classList.remove("open"));
-      stop.classList.add("open");
-      document.getElementById(`label-${k}`).textContent = stop.getAttribute("aria-label");
+    const c = e.target.closest("[data-copy]");
+    if (c) { copyLink(c.dataset.copy); return; }
+    const s = e.target.closest("[data-share]");
+    if (s) {
+      const d = DOCS.find(x => x.id === s.dataset.share);
+      window.open(`https://wa.me/?text=${encodeURIComponent(`${d.title}\n${docUrl(d.id)}`)}`, "_blank", "noopener");
       return;
     }
-    const sh = e.target.closest("[data-share]");
-    if (sh) {
-      const k = +sh.dataset.share;
-      const url = location.origin + location.pathname + "?t=" + encodeURIComponent(trips[k].name);
-      const note = document.getElementById(`share-${k}`);
-      const ok = () => { note.textContent = "הקישור הועתק. אפשר להדביק אותו בוואטסאפ או במייל."; note.className = "done"; };
-      if (navigator.clipboard) navigator.clipboard.writeText(url).then(ok, () => window.prompt("העתיקו את הקישור:", url));
-      else window.prompt("העתיקו את הקישור:", url);
-      return;
-    }
-    if (new URLSearchParams(location.search).get("t") !== null) return;
     const add = e.target.closest("[data-add]");
-    if (add) { const box = add.closest("[data-settle]"); box.querySelector('[data-f="exps"]').insertAdjacentHTML("beforeend", expRow()); refreshForm(box); return; }
+    if (add) { const box = add.closest("[data-form]"); box.querySelector("[data-exps]").insertAdjacentHTML("beforeend", expRow()); refreshSettle(box); return; }
     const del = e.target.closest("[data-del]");
-    if (del) { const box = del.closest("[data-settle]"); del.closest(".exp").remove(); refreshForm(box); return; }
-    const wa = e.target.closest("[data-wa]");
-    if (wa) { sendWhatsApp(wa.closest("[data-settle]"), trips[+wa.dataset.wa]); return; }
-    const tg = e.target.closest("[data-toggle]");
-    if (tg) {
-      const k = +tg.dataset.toggle, card = tg.closest(".card");
-      opened.has(k) ? opened.delete(k) : opened.add(k);
-      const isOpen = opened.has(k);
-      card.classList.toggle("expanded", isOpen);
-      tg.setAttribute("aria-expanded", isOpen);
-      const hint = card.querySelector(".more-hint"); if (hint) hint.textContent = isOpen ? "הסתרת הפרטים" : "לחיצה לפרטים המלאים";
+    if (del) { const box = del.closest("[data-form]"); del.closest(".exp").remove(); refreshSettle(box); return; }
+    const send = e.target.closest("[data-send]");
+    if (send) {
+      const box = send.closest("[data-form]");
+      if (!val(box, "name") || !val(box, "id")) { say(box, "חסרים שם ומספר תעודת זהות."); return; }
+      if (!checked(box, "decl")) { say(box, "יש לסמן את ההצהרה לפני השליחה."); return; }
+      openWhatsApp(send.dataset.send === "advance" ? advanceText(box) : settleText(box));
+      say(box, "נפתח וואטסאפ. לא לשכוח לצרף את הקבצים.", true);
+      return;
+    }
+    const pr = e.target.closest("[data-print]");
+    if (pr) {
+      const box = pr.closest("[data-form]");
+      if (!val(box, "name")) { say(box, "כדאי למלא לפחות שם לפני ההדפסה."); return; }
+      document.getElementById("print").innerHTML = advancePrint(box);
+      window.print();
     }
   });
-  document.addEventListener("input", e => {
-    const calc = e.target.closest("[data-calc]");
-    if (calc) runCalc(calc);
-    const box = e.target.closest("[data-settle]");
-    if (box) refreshForm(box);
-  });
-  document.addEventListener("change", e => {
-    const calc = e.target.closest("[data-calc]");
-    if (calc) runCalc(calc);
-    const box = e.target.closest("[data-settle]");
-    if (box) refreshForm(box);
-  });
-  document.addEventListener("keydown", e => {
-    const tg = e.target.closest && e.target.closest("[data-toggle]");
-    if (tg && (e.key === "Enter" || e.key === " ") && e.target === tg) { e.preventDefault(); tg.click(); }
-  });
-
-  // ---------- קריאת הנתונים מגיליון Google Sheets ----------
-  function parseCSV(text) {
-    const rows = []; let row = [], cell = "", q = false;
-    for (let k = 0; k < text.length; k++) {
-      const ch = text[k];
-      if (q) { if (ch === '"') { if (text[k + 1] === '"') { cell += '"'; k++; } else q = false; } else cell += ch; }
-      else if (ch === '"') q = true;
-      else if (ch === ",") { row.push(cell); cell = ""; }
-      else if (ch === "\n" || ch === "\r") { if (ch === "\r" && text[k + 1] === "\n") k++; row.push(cell); rows.push(row); row = []; cell = ""; }
-      else cell += ch;
+  function onField(e) {
+    const calc = e.target.closest("[data-calc]"); if (calc) runCalc(calc);
+    const box = e.target.closest("[data-form]");
+    if (!box) return;
+    if (box.dataset.form === "settle") refreshSettle(box);
+    if (box.dataset.form === "advance") {
+      box.querySelector("[data-vac]").hidden = box.querySelector('input[name="vac"]:checked').value !== "כן";
+      box.querySelector("[data-poa]").hidden = !checked(box, "poa");
     }
-    if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
-    return rows;
   }
-  function normDate(v) {
-    v = (v || "").trim(); let m;
-    if ((m = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`;
-    if ((m = v.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})/))) return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
-    return "";
-  }
-  // כותרת "אישור: X" – אישור בלי סבב. כותרת "סבב פנימי: X" – אישור בתוך סבב. כותרת "מסמך: X" – מסמך.
-  function sheetToTrips(rows, type) {
-    const head = (rows[0] || []).map(h => h.trim());
-    const col = n => head.indexOf(n);
-    const c = { name: col("שם הנסיעה"), start: col("תאריך יציאה"), end: col("תאריך חזרה"), dest: col("יעד"), notes: col("הערות"), people: col("משתתפים"), summary: col("סיכום נסיעה") };
-    if (c.name < 0) throw new Error(`בגיליון ${type} אין עמודה בשם "שם הנסיעה" בשורה הראשונה.`);
-    const aCols = [], dCols = [];
-    head.forEach((h, k) => {
-      const m = h.match(/^([^:]+):\s*(.+)$/); if (!m) return;
-      const pre = m[1].trim();
-      if (pre === "מסמך") dCols.push([k, m[2].trim()]);
-      else if (pre === "אישור") aCols.push([k, m[2].trim(), ""]);
-      else if (pre.startsWith("סבב")) aCols.push([k, m[2].trim(), pre]);
-    });
-    const get = (r, k) => (k >= 0 && r[k] != null ? String(r[k]).trim() : "");
-    return rows.slice(1).filter(r => get(r, c.name)).map(r => ({
-      type, name: get(r, c.name), start: normDate(get(r, c.start)), end: normDate(get(r, c.end)),
-      destination: get(r, c.dest), notes: get(r, c.notes), summary: get(r, c.summary),
-      participants: get(r, c.people).split(/[\n,]+/).map(x => x.trim()).filter(Boolean).map(x => {
-        const m = x.match(/^(.*?)\s*[-–:]\s*(יש|אין)\s*$/);
-        return m ? { name: m[1].trim(), visa: m[2] } : { name: x, visa: "אין" };
-      }),
-      approvals: aCols.filter(([k]) => get(r, k) !== "-").map(([k, role, round]) => ({ role, round, status: get(r, k) || "ממתין", date: "" })),
-      documents: dCols.filter(([k]) => get(r, k) !== "-").map(([k, name]) => ({ name, ready: get(r, k) || "אין" }))
-    }));
-  }
+  document.addEventListener("input", onField);
+  document.addEventListener("change", onField);
 
-  async function loadSheet(url, type) {
-    const res = await fetch(url + (url.includes("?") ? "&" : "?") + "t=" + Date.now(), { cache: "no-store" });
-    if (!res.ok) throw new Error(`לא הצלחתי לפתוח את הגיליון של ${type}.`);
-    return sheetToTrips(parseCSV(await res.text()), type);
-  }
-
-  // לשונית משתתפים: נסיעה | שם | ויזה | מקדמה | התחשבנות
-  function sheetToPeople(rows) {
-    const head = (rows[0] || []).map(h => h.trim());
-    const k = n => head.indexOf(n);
-    const c = { trip: k("נסיעה"), name: k("שם"), visa: k("ויזה"), adv: k("מקדמה"), set: k("התחשבנות") };
-    if (c.trip < 0 || c.name < 0) throw new Error('בלשונית המשתתפים צריכות להיות עמודות בשם "נסיעה" ו"שם".');
-    const get = (r, i) => (i >= 0 && r[i] != null ? String(r[i]).trim() : "");
-    return rows.slice(1).filter(r => get(r, c.trip) && get(r, c.name)).map(r => ({
-      trip: get(r, c.trip), name: get(r, c.name), visa: get(r, c.visa) || "אין", advance: get(r, c.adv) || "אין", settlement: get(r, c.set) || "אין"
-    }));
-  }
-  function attachPeople(people) {
-    const byTrip = new Map();
-    people.forEach(p => { if (!byTrip.has(p.trip)) byTrip.set(p.trip, []); byTrip.get(p.trip).push(p); });
-    trips.forEach(t => { if (byTrip.has(t.name)) { t.participants = byTrip.get(t.name); byTrip.delete(t.name); } });
-    unassigned = [...byTrip.keys()];
-  }
-
-  async function loadData() {
-    const sheets = [
-      [typeof SHEET_CSV_URL !== "undefined" ? SHEET_CSV_URL.trim() : "", TYPES[0]],
-      [typeof SHEET_CSV_URL_NASAH !== "undefined" ? SHEET_CSV_URL_NASAH.trim() : "", TYPES[1]],
-      [typeof SHEET_CSV_URL_SHLICHIM !== "undefined" ? SHEET_CSV_URL_SHLICHIM.trim() : "", TYPES[2]]
-    ].filter(([u]) => u);
-    const fileTrips = typeof TRIPS !== "undefined" ? TRIPS : null;
-    if (sheets.length) {
-      const problems = [];
-      const results = await Promise.all(sheets.map(([u, type]) => loadSheet(u, type).catch(e => { problems.push(e.message); return []; })));
-      trips = results.flat();
-      const peopleUrl = typeof SHEET_CSV_URL_PEOPLE !== "undefined" ? SHEET_CSV_URL_PEOPLE.trim() : "";
-      if (peopleUrl) {
-        try {
-          const res = await fetch(peopleUrl + (peopleUrl.includes("?") ? "&" : "?") + "t=" + Date.now(), { cache: "no-store" });
-          if (!res.ok) throw new Error("לא הצלחתי לפתוח את לשונית המשתתפים.");
-          attachPeople(sheetToPeople(parseCSV(await res.text())));
-        } catch (e) { problems.push(e.message); }
-      }
-      sourceNote = problems.length ? problems.join(" ") : `מסונכרן עם הגיליון, נטען ב-${new Date().toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}`;
-      if (!trips.length && problems.length) loadProblem = problems.join(" ");
-    } else if (fileTrips) {
-      trips = fileTrips;
-      sourceNote = typeof LAST_UPDATED !== "undefined" && LAST_UPDATED ? `עודכן ${fmt(LAST_UPDATED)}` : "";
-    } else {
-      loadProblem = "כנראה יש טעות קטנה בקובץ data.js, למשל פסיק או מירכאה חסרים. כדאי לבדוק את השינוי האחרון שנעשה בקובץ.";
-    }
-    document.getElementById("updated").textContent = sourceNote;
+  // טוענים את ההגדרות ואת טבלת התעריפים (תמיד בגרסה העדכנית), ואז מציגים
+  function load(src) { return new Promise(r => { const s = document.createElement("script"); s.src = src + "?v=" + Date.now(); s.onload = s.onerror = r; document.body.appendChild(s); }); }
+  Promise.all([load("data.js"), load("rates.js")]).then(() => {
+    if (hasRates()) document.getElementById("countries").innerHTML = RATES.filter((r, j, a) => a.findIndex(x => x[1] === r[1]) === j).map(r => `<option value="${esc(countryLabel(r))}">`).join("");
     render();
-  }
-
-  // טוען תמיד את הגרסה העדכנית של data.js (בלי זיכרון של הדפדפן)
-  const ratesScript = document.createElement("script");
-  ratesScript.src = "rates.js?v=" + Date.now();
-  ratesScript.onload = () => { if (hasRates()) document.getElementById("countries").innerHTML = RATES.filter((r, j, a) => a.findIndex(x => x[1] === r[1]) === j).map(r => `<option value="${esc(countryLabel(r))}">`).join(""); };
-  const dataScript = document.createElement("script");
-  dataScript.src = "data.js?v=" + Date.now();
-  dataScript.onload = loadData;
-  dataScript.onerror = loadData;
-  ratesScript.onerror = () => document.body.appendChild(dataScript);
-  const fillCountries = ratesScript.onload;
-  ratesScript.onload = () => { fillCountries(); document.body.appendChild(dataScript); };
-  document.body.appendChild(ratesScript);
+  });
 </script>
 </body>
 </html>
