@@ -150,6 +150,10 @@
   .decl-title { text-align: center; margin-top: 4px; }
   .actions-box { background: var(--card); border-radius: 16px; box-shadow: var(--shadow); padding: 16px 20px; }
   .actions-box .check { margin-top: 0; }
+  .tip { margin: 10px 0 0; font-size: .92rem; background: var(--main-soft); color: var(--ink); border-radius: 10px; padding: 10px 12px; }
+  .tip:empty { display: none; }
+  .draft-line { margin: 10px 0 0; font-size: .85rem; color: var(--muted); }
+  .link-btn { border: 0; background: none; color: var(--hot); text-decoration: underline; cursor: pointer; font-size: inherit; padding: 0; }
 
   /* הדפסה ושמירה כ-PDF: רק הטופס, בפורמט המקורי */
   @page { size: A4; margin: 12mm; }
@@ -310,7 +314,7 @@
       const pos = e => { const b = c.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
       c.addEventListener("pointerdown", e => { drawing = true; c.setPointerCapture(e.pointerId); ctx.beginPath(); ctx.moveTo(...pos(e)); });
       c.addEventListener("pointermove", e => { if (!drawing) return; ctx.lineTo(...pos(e)); ctx.stroke(); c.dataset.signed = "1"; });
-      ["pointerup", "pointercancel", "pointerleave"].forEach(ev => c.addEventListener(ev, () => drawing = false));
+      ["pointerup", "pointercancel", "pointerleave"].forEach(ev => c.addEventListener(ev, () => { if (drawing) { drawing = false; scheduleSave(c.closest("[data-form]")); } }));
     });
   }
   const signed = (box, n) => { const c = box.querySelector(`[data-sig="${n}"]`); return !!(c && c.dataset.signed); };
@@ -373,11 +377,13 @@
       <div class="actions-box no-print" data-actions="advance">
         <label class="check"><input type="checkbox" data-a="ticket"><span>יש לי כרטיס טיסה ואצרף אותו לבקשה</span></label>
         <div class="row-btns">
-          <button class="btn primary" data-print="advance">שמירה כ-PDF / הדפסה</button>
-          <button class="btn wa" data-send="advance">שליחה בוואטסאפ</button>
+          <button class="btn wa" data-print="advance">שליחת הטופס כ-PDF</button>
+          <button class="btn line" data-send="advance">שליחת סיכום בטקסט</button>
           <span data-msg></span>
         </div>
-        <p class="fine">איך שולחים: לוחצים "שמירה כ-PDF", שומרים את הקובץ, ואז "שליחה בוואטסאפ" ומצרפים בצ'אט את ה-PDF, כרטיס הטיסה, צילום כרטיס האשראי וטופס ניהול החשבון. הטופס לא נשמר באתר.</p>
+        <p class="tip" data-tip></p>
+        <p class="draft-line"><span data-saved>הטופס נשמר אוטומטית במכשיר הזה בלבד, אפשר לסגור ולחזור אליו.</span> <button type="button" class="link-btn" data-clear="advance">ניקוי הטופס</button></p>
+        <p class="fine">בנוסף לטופס שולחים באותו צ'אט: כרטיס טיסה, צילום כרטיס האשראי האישי משני הצדדים וטופס ניהול חשבון.</p>
       </div>`;
   }
   function advanceText(box) {
@@ -433,11 +439,13 @@
       </div></div>
       <div class="actions-box no-print" data-actions="settle">
         <div class="row-btns">
-          <button class="btn primary" data-print="settle">שמירה כ-PDF / הדפסה</button>
-          <button class="btn wa" data-send="settle">שליחה בוואטסאפ</button>
+          <button class="btn wa" data-print="settle">שליחת הטופס כ-PDF</button>
+          <button class="btn line" data-send="settle">שליחת סיכום בטקסט</button>
           <span data-msg></span>
         </div>
-        <p class="fine">איך שולחים: לוחצים "שמירה כ-PDF", שומרים את הקובץ, ואז "שליחה בוואטסאפ" ומצרפים בצ'אט את ה-PDF, הקבלות הסרוקות, אישור ניהול החשבון וצילום כרטיס האשראי. הטופס לא נשמר באתר.</p>
+        <p class="tip" data-tip></p>
+        <p class="draft-line"><span data-saved>הטופס נשמר אוטומטית במכשיר הזה בלבד, אפשר לסגור ולחזור אליו.</span> <button type="button" class="link-btn" data-clear="settle">ניקוי הטופס</button></p>
+        <p class="fine">בנוסף לטופס שולחים באותו צ'אט: קבלות סרוקות, אישור ניהול חשבון בנק וצילום כרטיס אשראי משני הצדדים.</p>
       </div>`;
   }
   function fixRowspans(box) {
@@ -475,6 +483,68 @@
     return lines.filter((x, i, a) => !(x === "" && a[i - 1] === "")).join("\n");
   }
 
+  // ---------- שמירת טיוטה במכשיר (localStorage) ----------
+  const DRAFT_KEY = "draft-v1:";
+  const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const IS_ANDROID = /Android/i.test(navigator.userAgent);
+  const saveTimers = {};
+  function scheduleSave(form) {
+    if (!form) return;
+    const kind = form.dataset.form;
+    clearTimeout(saveTimers[kind]);
+    saveTimers[kind] = setTimeout(() => saveDraft(form), 400);
+  }
+  function saveDraft(form) {
+    const kind = form.dataset.form, d = { f: {}, r: {}, sig: {}, rows: {}, a: {} };
+    form.querySelectorAll("[data-f]").forEach(el => { d.f[el.dataset.f] = el.value; if (el.dataset.auto) d.f["__auto_" + el.dataset.f] = 1; });
+    form.querySelectorAll('input[type="radio"]:checked').forEach(el => d.r[el.name] = el.value);
+    form.querySelectorAll("canvas.sig").forEach(c => { if (c.dataset.signed) d.sig[c.dataset.sig] = c.toDataURL("image/png"); });
+    form.querySelectorAll("tbody[data-group]").forEach(tb => {
+      d.rows[tb.dataset.group] = [...tb.rows].map(tr => ({
+        date: tr.querySelector('[data-c="date"]').value, amount: tr.querySelector('[data-c="amount"]').value,
+        meals: [...tr.querySelectorAll("[data-m]")].filter(x => x.checked).map(x => x.dataset.m)
+      }));
+    });
+    const actions = document.querySelector(`[data-actions="${kind}"]`);
+    if (actions) actions.querySelectorAll("[data-a]").forEach(el => d.a[el.dataset.a] = el.checked);
+    try { localStorage.setItem(DRAFT_KEY + kind, JSON.stringify(d)); } catch (_) {}
+  }
+  function restoreDraft(form) {
+    const kind = form.dataset.form;
+    let d = null;
+    try { d = JSON.parse(localStorage.getItem(DRAFT_KEY + kind) || "null"); } catch (_) {}
+    if (!d) return;
+    Object.entries(d.rows || {}).forEach(([key, rows]) => {
+      const tb = form.querySelector(`tbody[data-group="${key}"]`), r = SETTLE_ROWS.find(x => x.key === key);
+      if (!tb || !r) return;
+      while (tb.rows.length < rows.length) tb.insertAdjacentHTML("beforeend", entryRow(r, false));
+      rows.forEach((x, i) => {
+        const tr = tb.rows[i];
+        tr.querySelector('[data-c="date"]').value = x.date || "";
+        tr.querySelector('[data-c="amount"]').value = x.amount || "";
+        tr.querySelectorAll("[data-m]").forEach(m => m.checked = (x.meals || []).includes(m.dataset.m));
+      });
+    });
+    fixRowspans(form);
+    Object.entries(d.f || {}).forEach(([k, v]) => {
+      if (k.startsWith("__auto_")) return;
+      const el = form.querySelector(`[data-f="${k}"]`);
+      if (el) { el.value = v; if (d.f["__auto_" + k]) el.dataset.auto = "1"; }
+    });
+    Object.entries(d.r || {}).forEach(([name, v]) => { const el = [...form.querySelectorAll(`input[name="${name}"]`)].find(x => x.value === v); if (el) el.checked = true; });
+    Object.entries(d.sig || {}).forEach(([name, url]) => {
+      const c = form.querySelector(`[data-sig="${name}"]`); if (!c) return;
+      const img = new Image();
+      img.onload = () => { const ctx = c.getContext("2d"); ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(img, 0, 0, c.width, c.height); ctx.restore(); c.dataset.signed = "1"; };
+      img.src = url;
+    });
+    const actions = document.querySelector(`[data-actions="${kind}"]`);
+    if (actions) Object.entries(d.a || {}).forEach(([k, v]) => { const el = actions.querySelector(`[data-a="${k}"]`); if (el) el.checked = v; });
+    if (kind === "settle") refreshSettle(form);
+    const saved = actions && actions.querySelector("[data-saved]");
+    if (saved) saved.textContent = "המשכת מאיפה שעצרת. הטופס נשמר במכשיר הזה בלבד.";
+  }
+
   // העתקת פרטים שחוזרים על עצמם בטופס (שם ות"ז בחתימה ובייפוי הכוח)
   const MIRRORS = { name: ["signName", "poaMyName"], id: ["signId", "poaMyId"], rank: ["signRank"] };
   function mirror(box, src) {
@@ -493,6 +563,7 @@
     const body = id === "calc" ? calcHtml() : id === "advance" ? advanceHtml() : settleHtml();
     app.innerHTML = docHead(d) + body;
     setupSigs(app);
+    app.querySelectorAll("[data-form]").forEach(restoreDraft);
     document.title = d.title;
     window.scrollTo(0, 0);
   }
@@ -515,11 +586,11 @@
       return;
     }
     const sc = e.target.closest("[data-sig-clear]");
-    if (sc) { const c = document.querySelector(`[data-sig="${sc.dataset.sigClear}"]`); c.getContext("2d").clearRect(0, 0, c.width, c.height); delete c.dataset.signed; return; }
+    if (sc) { const c = document.querySelector(`[data-sig="${sc.dataset.sigClear}"]`); c.getContext("2d").clearRect(0, 0, c.width, c.height); delete c.dataset.signed; scheduleSave(c.closest("[data-form]")); return; }
     const al = e.target.closest("[data-addline]");
     if (al) {
       const r = SETTLE_ROWS.find(x => x.key === al.dataset.addline), tb = al.closest("tbody");
-      tb.insertAdjacentHTML("beforeend", entryRow(r, false)); fixRowspans(tb.closest("[data-form]")); return;
+      tb.insertAdjacentHTML("beforeend", entryRow(r, false)); fixRowspans(tb.closest("[data-form]")); scheduleSave(tb.closest("[data-form]")); return;
     }
     const send = e.target.closest("[data-send]");
     if (send) {
@@ -534,18 +605,34 @@
     const pr = e.target.closest("[data-print]");
     if (pr) {
       const kind = pr.dataset.print, form = document.querySelector(`[data-form="${kind}"]`), box = pr.closest("[data-actions]");
+      if (!val(form, "name") || !val(form, "id")) { say(box, "חסרים שם ומספר תעודת זהות בראש הטופס."); return; }
       if (kind === "advance" && !box.querySelector('[data-a="ticket"]').checked) { say(box, "לבקשת מקדמה חובה לצרף כרטיס טיסה. יש לסמן שהוא יצורף."); return; }
+      if (!signed(form, "main") && !confirm("לא חתמת על הטופס. להמשיך בלי חתימה (למשל כדי לחתום ביד אחרי ההדפסה)?")) return;
+      const tip = box.querySelector("[data-tip]");
+      tip.textContent = IS_IOS ? "במסך שנפתח לוחצים על סמל השיתוף (⬆︎) למעלה, ובוחרים וואטסאפ. הטופס יישלח כקובץ PDF."
+        : IS_ANDROID ? "במסך שנפתח בוחרים \"שמירה כ-PDF\", ואחרי השמירה לוחצים \"שיתוף\" ובוחרים וואטסאפ."
+        : "במסך שנפתח בוחרים \"שמירה כ-PDF\" (Save as PDF), ואז שולחים את הקובץ בוואטסאפ.";
+      say(box, "", true);
       document.title = (kind === "advance" ? "מקדמה" : "התחשבנות") + " - " + (val(form, "name") || "טופס");
-      window.print();
-      document.title = DOCS.find(x => x.id === kind).title;
+      setTimeout(() => { window.print(); document.title = DOCS.find(x => x.id === kind).title; }, 50);
+      return;
+    }
+    const cl = e.target.closest("[data-clear]");
+    if (cl) {
+      if (!confirm("למחוק את כל מה שמילאת בטופס הזה?")) return;
+      try { localStorage.removeItem(DRAFT_KEY + cl.dataset.clear); } catch (_) {}
+      render();
     }
   });
   function onField(e) {
+    const act = e.target.closest("[data-actions]");
+    if (act) { scheduleSave(document.querySelector(`[data-form="${act.dataset.actions}"]`)); return; }
     const calc = e.target.closest("[data-calc]"); if (calc) runCalc(calc);
     const form = e.target.closest("[data-form]");
     if (!form) return;
     if (e.target.dataset && e.target.dataset.f) { if (MIRRORS[e.target.dataset.f]) mirror(form, e.target); else delete e.target.dataset.auto; }
     if (form.dataset.form === "settle") refreshSettle(form);
+    scheduleSave(form);
   }
   document.addEventListener("input", onField);
   document.addEventListener("change", onField);
