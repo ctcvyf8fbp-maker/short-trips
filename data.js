@@ -14,8 +14,14 @@
 // SHEET_CSV_URL_NASAH = הלשונית של נסיעות נס"ח
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtPQgfg9nmlw4-UYy2u_19lQ1Kfy-kQTwnz9A2zGj_n8q5SkwNb5ZstY9ikJRNaURvNd4IC_DF-RgH/pub?gid=276988776&single=true&output=csv";
 const SHEET_CSV_URL_NASAH = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtPQgfg9nmlw4-UYy2u_19lQ1Kfy-kQTwnz9A2zGj_n8q5SkwNb5ZstY9ikJRNaURvNd4IC_DF-RgH/pub?gid=1084406962&single=true&output=csv";
+// SHEET_CSV_URL_SHLICHIM = הלשונית של שליחים (אותו מבנה כמו נס"ח)
+const SHEET_CSV_URL_SHLICHIM = "";
 // SHEET_CSV_URL_PEOPLE = הלשונית של המשתתפים (ויזה, מקדמה, התחשבנות)
 const SHEET_CSV_URL_PEOPLE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtPQgfg9nmlw4-UYy2u_19lQ1Kfy-kQTwnz9A2zGj_n8q5SkwNb5ZstY9ikJRNaURvNd4IC_DF-RgH/pub?gid=921306285&single=true&output=csv";
+
+// מספר וואטסאפ לקבלת טופסי ההתחשבנות, בפורמט בינלאומי (למשל "972501234567").
+// אם ריק – וואטסאפ ייפתח ויבקש לבחור למי לשלוח.
+const SETTLEMENT_WHATSAPP = "";
 
 // קישור להעלאת דרכונים (למשל Dropbox File Request). אם ריק – הכפתור לא מופיע.
 const PASSPORT_UPLOAD_LINK = "";

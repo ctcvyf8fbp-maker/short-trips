@@ -140,6 +140,56 @@
   .single .card-main { cursor: default; }
   .single .more-hint, .single .share { display: none; }
 
+  /* התחשבנות, מחשבון וסיכום נסיעה */
+  .block { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 18px; }
+  .block > h4 { font-size: 1.05rem; color: var(--ink); font-weight: 700; margin-bottom: 10px; }
+  .callout { background: var(--soft); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; font-size: .95rem; }
+  .callout.warn { background: #FBEFD9; color: #6B4A00; }
+  .callout.bad { background: var(--hot-soft); color: var(--hot); }
+  .callout ul { margin: 6px 0 0; padding-inline-start: 20px; }
+  details.fold { border: 1px solid var(--line); border-radius: 12px; margin-bottom: 10px; background: var(--card); }
+  details.fold > summary { cursor: pointer; padding: 12px 14px; font-weight: 700; list-style: none; }
+  details.fold > summary::-webkit-details-marker { display: none; }
+  details.fold > summary::after { content: " ▾"; color: var(--muted); }
+  details.fold[open] > summary::after { content: " ▴"; }
+  details.fold > .in { padding: 0 14px 14px; }
+  .rules { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  .rules th, .rules td { text-align: start; padding: 8px 6px; border-top: 1px solid var(--soft); vertical-align: top; }
+  .rules th { width: 34%; }
+  .decl { font-size: .9rem; color: var(--muted); margin-top: 10px; }
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px 14px; }
+  .field { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; color: var(--muted); font-weight: 600; }
+  .field input, .field select, .exp input, .exp select {
+    font: inherit; font-size: .95rem; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 9px; padding: 8px 10px; min-width: 0;
+  }
+  .field input:focus, .field select:focus, .exp input:focus, .exp select:focus { outline: 2px solid var(--main); border-color: transparent; }
+  .exp-list { margin-top: 14px; display: grid; gap: 10px; }
+  .exp { display: grid; grid-template-columns: 1.3fr 1fr 1fr .7fr 1.4fr auto; gap: 8px; align-items: center; background: var(--soft); border-radius: 10px; padding: 10px; }
+  .exp .meals { grid-column: 1 / -1; display: flex; gap: 14px; font-size: .88rem; color: var(--muted); align-items: center; }
+  .exp .meals[hidden] { display: none; }
+  .exp .del { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 1.1rem; padding: 4px 8px; }
+  .row-btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: center; }
+  .ghost { border: 1px dashed var(--main); background: none; color: var(--main); font-weight: 700; padding: 7px 14px; border-radius: 10px; cursor: pointer; }
+  .wa { border: 0; background: #1F9D55; color: #fff; font-weight: 700; padding: 10px 18px; border-radius: 10px; cursor: pointer; }
+  .check { display: flex; gap: 10px; align-items: flex-start; font-size: .92rem; margin-top: 14px; }
+  .check input { margin-top: 4px; width: 18px; height: 18px; accent-color: var(--main); flex: none; }
+  .total { font-weight: 700; }
+  .form-msg { font-size: .9rem; font-weight: 700; }
+  .form-msg.bad { color: var(--hot); }
+  .form-msg.ok { color: var(--main); }
+  .calc-out { margin-top: 12px; display: grid; gap: 8px; }
+  .calc-line { display: flex; justify-content: space-between; gap: 12px; background: var(--soft); border-radius: 10px; padding: 10px 14px; flex-wrap: wrap; }
+  .calc-line b { font-family: "Rubik", sans-serif; }
+  .fine { font-size: .82rem; color: var(--muted); margin-top: 8px; }
+  .summary-row { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+  .summary-row .box { width: 24px; height: 24px; }
+  .summary-row.yes .box { background: var(--main); border-color: var(--main); }
+  .summary-row.no-yet { color: var(--muted); }
+  @media (max-width: 640px) {
+    .exp { grid-template-columns: 1fr 1fr; }
+    .exp .del { justify-self: end; }
+  }
+
   details.past { margin-top: 4px; }
   details.past summary { cursor: pointer; color: var(--muted); font-weight: 600; padding: 6px 2px; list-style: none; }
   details.past summary::-webkit-details-marker { display: none; }
@@ -160,11 +210,12 @@
   </header>
   <div class="filter" id="filter" hidden></div>
   <main id="app"></main>
+  <datalist id="countries"></datalist>
 </div>
 
 <script>
   // סוגי נסיעות, לפי הסדר שבו הם מופיעים באתר
-  const TYPES = ['מש"ב', 'נס"ח'];
+  const TYPES = ['מש"ב', 'נס"ח', 'שליחים'];
   const URGENT_DAYS = 14;
   const ROUND_COLORS = { "סבב פנימי": "var(--r-in)", "סבב חיצוני": "var(--r-out)", "סבב במערכת": "var(--r-sys)" };
   const PLANE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C11 2 10.5 3 10.5 4V9L3 13.5V15.5L10.5 13V18L8.5 19.5V21L12 20L15.5 21V19.5L13.5 18V13L21 15.5V13.5L13.5 9V4C13.5 3 13 2 12 2Z"/></svg>';
@@ -196,7 +247,8 @@
     const during = st && !past && st <= now;
     const missA = steps.length - approved, missD = docs.length - docsReady;
     const hot = !past && days !== null && days <= URGENT_DAYS && (missA > 0 || missD > 0 || rejectedIdx >= 0);
-    return { advances, settled, steps, docs, people, approved, rejectedIdx, curIdx, docsReady, visas, days, past, during, missA, missD, hot };
+    const summarySent = /^(נשלח|יש|כן|✓)$/.test(String(t.summary || "").trim());
+    return { summarySent, advances, settled, steps, docs, people, approved, rejectedIdx, curIdx, docsReady, visas, days, past, during, missA, missD, hot };
   }
 
   function sortTrips(list) {
@@ -240,6 +292,169 @@
     return `<ul class="checks">${items.map(x => `<li class="${x.yes ? "yes" : ""}"><span class="box" aria-hidden="true">${x.yes ? "✓" : ""}</span>${esc(x.label)}<span class="tag">${x.yes ? x.y : x.n}</span></li>`).join("")}</ul>`;
   }
 
+  // ---------- מחשבון אשל ולינה ----------
+  const hasRates = () => typeof RATES !== "undefined" && RATES.length;
+  const countryLabel = r => `${r[0]} (${r[1]})`;
+  function calcHtml(t, k) {
+    if (!hasRates()) return "";
+    const expired = typeof RATES_VALID_TO !== "undefined" && parse(RATES_VALID_TO) < today();
+    return `<div class="block" data-calc="${k}">
+      <h4>מחשבון אשל ולינה</h4>
+      <div class="form-grid">
+        <label class="field">מדינת יעד<input list="countries" data-c="country" placeholder="למשל: ארצות הברית"></label>
+        <label class="field">עיר<select data-c="city" disabled><option>בוחרים קודם מדינה</option></select></label>
+        <label class="field">תאריך התחלה<input type="date" data-c="from" value="${esc(t.start || "")}"></label>
+        <label class="field">תאריך סיום<input type="date" data-c="to" value="${esc(t.end || "")}"></label>
+      </div>
+      <div class="calc-out" data-c="out"></div>
+      <p class="fine">החישוב לפי ${esc(typeof RATES_SOURCE !== "undefined" ? RATES_SOURCE : "טבלת התעריפים")}. ימים נספרים כימים קלנדריים מיום ההתחלה עד יום הסיום כולל, ולילות כמספר הלילות ביניהם. זו הערכה בלבד; הזכאות הסופית נקבעת לפי הוראת תכ"ם 13.10.2 (כולל כללים לימי יציאה וחזרה).</p>
+      ${expired ? `<div class="callout warn">שימו לב: הטבלה בתוקף עד ${fmt(RATES_VALID_TO)}. ייתכן שפורסמה מהדורה חדשה עם תעריפים מעודכנים.</div>` : ""}
+    </div>`;
+  }
+  function runCalc(box) {
+    const q = s => box.querySelector(`[data-c="${s}"]`);
+    const typed = q("country").value.trim();
+    const rows = RATES.filter(r => countryLabel(r) === typed || r[0] === typed || r[1].toLowerCase() === typed.toLowerCase());
+    const citySel = q("city");
+    const prevCity = citySel.value;
+    if (rows.length) {
+      const cities = [...new Set(rows.map(r => r[2]))];
+      citySel.innerHTML = cities.map(c => `<option ${c === prevCity ? "selected" : ""}>${esc(c)}</option>`).join("");
+      citySel.disabled = cities.length < 2;
+    } else {
+      citySel.innerHTML = `<option>${typed ? "יעד שלא בטבלה" : "בוחרים קודם מדינה"}</option>`;
+      citySel.disabled = true;
+    }
+    const from = parse(q("from").value), to = parse(q("to").value), out = q("out");
+    if (!typed || !from || !to) { out.innerHTML = ""; return; }
+    if (to < from) { out.innerHTML = `<div class="callout bad">תאריך הסיום לפני תאריך ההתחלה.</div>`; return; }
+    const days = Math.round((to - from) / 86400000) + 1, nights = days - 1;
+    const n = x => x.toLocaleString("he-IL");
+    if (!rows.length) {
+      out.innerHTML = `<div class="callout">היעד לא נמצא בטבלה. ליעדים שאינם בטבלה קצובת השהייה היא ${RATES_DEFAULT_PERDIEM} ₪ ליום, כלומר <b>${n(RATES_DEFAULT_PERDIEM * days)} ₪</b> ל-${days} ימים. את קצובת הלינה יש לבדוק מול הגורם המאשר.</div>`;
+      return;
+    }
+    const r = rows.find(x => x[2] === citySel.value) || rows[0];
+    out.innerHTML = `
+      <div class="calc-line"><span>קצובת שהייה (אשל): ${n(r[5])} ₪ ליום × ${days} ${days === 1 ? "יום" : "ימים"}</span><b>${n(r[5] * days)} ₪</b></div>
+      <div class="calc-line"><span>קצובת לינה: עד ${n(r[4])} ${r[3]} ללילה × ${nights} ${nights === 1 ? "לילה" : "לילות"}</span><b>עד ${n(r[4] * nights)} ${r[3]}</b></div>`;
+  }
+
+  // ---------- טופס התחשבנות ----------
+  const EXPENSES = [
+    ["כלכלה", "ללא קבלות. מסמנים את הארוחות שיש לקזז: ארוחות רשמיות שהוזמנו על חשבון השותף בחו\"ל, מארחים, כנס או קורס (כלומר ללא שימוש בקצובה)."],
+    ["לינה", "יש להגיש קבלה עם פירוט מספר ימים ומחיר ללילה, ושם הנוסע. שהייה בחדר משותף. חריגה מקצובת הלינה מחייבת אישור לפני הנסיעה."],
+    ["הוצאות רכב בחו\"ל", "קבלה על דלק עם פירוט כמות ומחיר לגלון/ליטר. חל איסור על תדלוק בחברת השכרת הרכב. כן קבלות מסוג re-paid. קבלה על חניה בחו\"ל, כבישי אגרה."],
+    ["תחבורה ל/מ שדה התעופה בארץ", "מוניות בארץ כנגד קבלה. חניה בשדה עד 50 ₪ ליום."],
+    ["תחבורה ל/מ שדה התעופה בחו\"ל", "מוניות כנגד קבלה, תחבורה ציבורית לצורכי עבודה בלבד. יש לציין את היעד והמטרה. כאשר משולבת חופשה פרטית, החזר המונית אל/מ שדה התעופה יתבצע כאשר אין שינוי במקום התפקיד."],
+    ["אחר", "באישור מראש: כנס, קורס, מזוודה."]
+  ];
+  const DECLARATION = "אני החתום/ה מטה מצהיר/ה בזאת כי הקבלות וההוצאות שהצגתי בפני אגף הכספים/חטיבת פרט והסדרי נסיעות חו\"ל הינן הוצאות שהוצאו בפועל במסגרת נסיעתי בתפקיד בלבד. הנני מודע/ת לכך כי במקרה שהפרטים הנ\"ל אינם נכונים אדרש להשיב את הכספים ששולמו לי ביתר ועלול/ה להיפתח נגדי הליך משמעתי.";
+  function addMonth(d) { const x = parse(d); if (!x) return null; const y = new Date(x); y.setMonth(y.getMonth() + 1); return y; }
+  function expRow() {
+    return `<div class="exp">
+      <select data-e="type" aria-label="סוג ההוצאה">${EXPENSES.map(e => `<option>${esc(e[0])}</option>`).join("")}</select>
+      <input type="date" data-e="date" aria-label="תאריך">
+      <input type="number" min="0" step="0.01" data-e="amount" placeholder="סכום" aria-label="סכום">
+      <select data-e="cur" aria-label="מטבע"><option>₪</option><option>$</option><option>€</option><option>£</option><option>אחר</option></select>
+      <input data-e="note" placeholder="הערות" aria-label="הערות">
+      <button type="button" class="del" data-del aria-label="מחיקת השורה">✕</button>
+      <div class="meals">ארוחות לקיזוז:
+        <label><input type="checkbox" data-e="m1"> בוקר</label>
+        <label><input type="checkbox" data-e="m2"> צהריים</label>
+        <label><input type="checkbox" data-e="m3"> ערב</label>
+      </div>
+    </div>`;
+  }
+  function settlementHtml(t, k, i) {
+    const due = addMonth(t.end || t.start);
+    const now = today();
+    let dueText = "";
+    if (due) {
+      const left = Math.round((due - now) / 86400000);
+      const dueFmt = due.toLocaleDateString("he-IL", { day: "numeric", month: "numeric", year: "numeric" });
+      dueText = left < 0 ? `<div class="callout bad">המועד להגשת ההתחשבנות עבר (${dueFmt}).</div>`
+        : `<div class="callout">את ההתחשבנות ניתן להגיש עד חודש מיום החזרה, כלומר <b>עד ${dueFmt}</b>${i.past ? `, נשארו ${left} ימים` : ""}.</div>`;
+    }
+    return `<div class="block" data-settle="${k}">
+      <h4>התחשבנות לאחר הנסיעה</h4>
+      ${dueText}
+      <div class="callout warn"><b>יש לצרף בנוסף לטופס:</b>
+        <ul><li>קבלות סרוקות</li><li>אישור ניהול חשבון בנק</li><li>צילום כרטיס אשראי משני הצדדים</li></ul>
+      </div>
+      <details class="fold"><summary>1. קריאת הטופס לפני המילוי</summary><div class="in">
+        <p style="margin-top:0">ההוצאות שמפרטים בטופס הן הוצאות בפועל לזמן השהות בתפקיד בלבד.</p>
+        <table class="rules"><tbody>${EXPENSES.map(e => `<tr><th>${esc(e[0])}</th><td>${esc(e[1])}</td></tr>`).join("")}</tbody></table>
+        <p class="decl"><b>הצהרה:</b> ${esc(DECLARATION)}</p>
+      </div></details>
+      <details class="fold"><summary>2. מילוי מקוון ושליחה בוואטסאפ</summary><div class="in">
+        <div class="form-grid">
+          <label class="field">שם הנוסע/ת<input data-f="name" list="people-${k}"></label>
+          <label class="field">מספר תעודת זהות<input data-f="id" inputmode="numeric"></label>
+          <label class="field">דרגה / תפקיד<input data-f="rank"></label>
+          <label class="field">אגף<input data-f="unit"></label>
+          <label class="field">מס' נייד<input data-f="phone" inputmode="tel"></label>
+          <label class="field">כתובת מייל<input data-f="email" type="email"></label>
+          <label class="field">יעד<input data-f="dest" value="${esc(t.destination || "")}"></label>
+          <label class="field">נמשכה מקדמה בסכום של<input data-f="advance" inputmode="decimal"></label>
+          <label class="field">תאריך יציאה מהארץ<input type="date" data-f="out" value="${esc(t.start || "")}"></label>
+          <label class="field">שעת המראה<input type="time" data-f="outTime"></label>
+          <label class="field">תאריך חזרה לארץ<input type="date" data-f="back" value="${esc(t.end || "")}"></label>
+          <label class="field">שעת נחיתה<input type="time" data-f="backTime"></label>
+        </div>
+        <datalist id="people-${k}">${(t.participants || []).map(p => `<option value="${esc(p.name)}">`).join("")}</datalist>
+        <div class="exp-list" data-f="exps">${expRow()}</div>
+        <div class="row-btns"><button type="button" class="ghost" data-add>+ הוספת הוצאה</button><span class="total" data-f="total"></span></div>
+        <label class="check"><input type="checkbox" data-f="decl"><span>${esc(DECLARATION)}</span></label>
+        <div class="row-btns"><button type="button" class="wa" data-wa="${k}">שליחה בוואטסאפ</button><span class="form-msg" data-f="msg"></span></div>
+        <p class="fine">הטופס לא נשמר באתר. אחרי השליחה מצרפים בצ'אט של הוואטסאפ את הקבלות הסרוקות, אישור ניהול החשבון וצילום כרטיס האשראי.</p>
+      </div></details>
+    </div>`;
+  }
+  function expData(row) {
+    const g = n => row.querySelector(`[data-e="${n}"]`);
+    return { type: g("type").value, date: g("date").value, amount: parseFloat(g("amount").value) || 0, cur: g("cur").value, note: g("note").value.trim(),
+             meals: ["m1", "m2", "m3"].filter(m => g(m).checked).map(m => ({ m1: "בוקר", m2: "צהריים", m3: "ערב" })[m]) };
+  }
+  function refreshForm(box) {
+    box.querySelectorAll(".exp").forEach(r => { r.querySelector(".meals").hidden = r.querySelector('[data-e="type"]').value !== "כלכלה"; });
+    const sums = {};
+    box.querySelectorAll(".exp").forEach(r => { const e = expData(r); if (e.amount) sums[e.cur] = (sums[e.cur] || 0) + e.amount; });
+    const parts = Object.entries(sums).map(([c, v]) => `${v.toLocaleString("he-IL")} ${c}`);
+    box.querySelector('[data-f="total"]').textContent = parts.length ? `סה"כ: ${parts.join(" + ")}` : "";
+  }
+  function sendWhatsApp(box, t) {
+    const f = n => (box.querySelector(`[data-f="${n}"]`).value || "").trim();
+    const msg = box.querySelector('[data-f="msg"]');
+    if (!f("name") || !f("id")) { msg.className = "form-msg bad"; msg.textContent = "חסרים שם ומספר תעודת זהות."; return; }
+    if (!box.querySelector('[data-f="decl"]').checked) { msg.className = "form-msg bad"; msg.textContent = "יש לסמן את ההצהרה לפני השליחה."; return; }
+    const d = v => v ? fmt(v) : "";
+    const lines = [
+      `*התחשבנות לאחר נסיעת חו"ל בתפקיד*`,
+      `נסיעה: ${t.name}`,
+      `שם: ${f("name")} | ת"ז: ${f("id")}`,
+      f("rank") || f("unit") ? `דרגה/תפקיד: ${f("rank")}${f("unit") ? ` | אגף: ${f("unit")}` : ""}` : "",
+      f("phone") || f("email") ? `נייד: ${f("phone")}${f("email") ? ` | מייל: ${f("email")}` : ""}` : "",
+      f("dest") ? `יעד: ${f("dest")}` : "",
+      `יציאה: ${d(f("out"))} ${f("outTime")}`.trim(),
+      `חזרה: ${d(f("back"))} ${f("backTime")}`.trim(),
+      f("advance") ? `נמשכה מקדמה בסכום של: ${f("advance")}` : "נמשכה מקדמה: לא צוין",
+      "",
+      "*הוצאות:*"
+    ].filter(x => x !== "");
+    const exps = [...box.querySelectorAll(".exp")].map(expData).filter(e => e.amount || e.meals.length || e.note || e.date);
+    if (!exps.length) lines.push("אין הוצאות");
+    exps.forEach(e => lines.push(`• ${e.type}${e.date ? ` | ${d(e.date)}` : ""}${e.amount ? ` | ${e.amount.toLocaleString("he-IL")} ${e.cur}` : ""}${e.meals.length ? ` | ארוחות לקיזוז: ${e.meals.join(", ")}` : ""}${e.note ? ` | ${e.note}` : ""}`));
+    const total = box.querySelector('[data-f="total"]').textContent;
+    if (total) lines.push(total);
+    lines.push("", "✓ הצהרתי כי ההוצאות הוצאו בפועל במסגרת נסיעתי בתפקיד בלבד.", `חתימה: ${f("name")}`,
+      "", "מצורפים בהודעות הבאות: קבלות סרוקות, אישור ניהול חשבון בנק, צילום כרטיס אשראי משני הצדדים.");
+    const text = lines.join("\n");
+    const num = typeof SETTLEMENT_WHATSAPP !== "undefined" ? String(SETTLEMENT_WHATSAPP).replace(/\D/g, "") : "";
+    window.open(`https://wa.me/${num}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
+    msg.className = "form-msg ok"; msg.textContent = "נפתח וואטסאפ. לא לשכוח לצרף את הקבצים.";
+  }
+
   function peopleTable(people) {
     const box = (v, label) => `<span class="box ${isYes(v) ? "yes" : ""}" role="img" aria-label="${label} ${isYes(v) ? "יש" : "אין"}">${isYes(v) ? "✓" : ""}</span>`;
     return `<table class="people"><thead><tr><th>שם</th><th>ויזה</th><th>מקדמה</th><th>התחשבנות</th></tr></thead><tbody>${
@@ -277,7 +492,8 @@
       i.docs.length ? `<span class="chip ${i.missD ? "no" : "ok"}">מסמכים ${i.docsReady}/${i.docs.length}</span>` : "",
       i.people.length ? `<span class="chip ${i.visas < i.people.length ? "no" : "ok"}">ויזות ${i.visas}/${i.people.length}</span>` : "",
       i.people.length ? `<span class="chip ${i.advances < i.people.length ? "no" : "ok"}">מקדמות ${i.advances}/${i.people.length}</span>` : "",
-      i.people.length ? `<span class="chip ${i.settled === i.people.length ? "ok" : i.past ? "no" : ""}">התחשבנות ${i.settled}/${i.people.length}</span>` : ""
+      i.people.length ? `<span class="chip ${i.settled === i.people.length ? "ok" : i.past ? "no" : ""}">התחשבנות ${i.settled}/${i.people.length}</span>` : "",
+      i.summarySent ? `<span class="chip ok">סיכום נסיעה נשלח</span>` : i.past ? `<span class="chip no">חסר סיכום נסיעה</span>` : ""
     ].join("");
     const upload = typeof PASSPORT_UPLOAD_LINK !== "undefined" && PASSPORT_UPLOAD_LINK
       ? `<a class="btn" href="${esc(PASSPORT_UPLOAD_LINK)}" target="_blank" rel="noopener">העלאת דרכון</a>` : "";
@@ -309,6 +525,9 @@
             ${stepsList(i)}
           </div>
           ${t.notes ? `<div class="wide"><h4>הערות</h4><div class="notes">${esc(t.notes)}</div></div>` : ""}
+          ${calcHtml(t, k)}
+          ${settlementHtml(t, k, i)}
+          <div class="block"><div class="summary-row ${i.summarySent ? "yes" : "no-yet"}"><span class="box" aria-hidden="true">${i.summarySent ? "✓" : ""}</span>${i.summarySent ? "נשלח סיכום נסיעה" : "טרם נשלח סיכום נסיעה"}</div></div>
           <div class="share"><button data-share="${k}">העתקת קישור לנסיעה הזאת</button><small id="share-${k}">מי שיקבל את הקישור יראה רק את הנסיעה הזאת</small></div>
         </div>
       </article>`;
@@ -331,9 +550,9 @@
       document.title = trips[k].name;
       return;
     }
-    const GROUP_LINKS = { mashab: TYPES[0], nasah: TYPES[1] };
+    const GROUP_LINKS = { mashab: TYPES[0], nasah: TYPES[1], shlichim: TYPES[2] };
     const lockedType = GROUP_LINKS[new URLSearchParams(location.search).get("g")];
-    if (lockedType) { filter = lockedType; document.querySelector("header.page h1").textContent = `נסיעות ${lockedType}`; }
+    if (lockedType) { filter = lockedType; document.querySelector("header.page h1").textContent = (lockedType === "שליחים" ? "שליחים" : `נסיעות ${lockedType}`); }
     const byType = TYPES.map(type => ({ type, list: trips.map((t, k) => [t, k]).filter(([t]) => (t.type || TYPES[0]) === type) }));
     const f = document.getElementById("filter");
     f.hidden = !!lockedType;
@@ -344,7 +563,7 @@
       const sorted = sortTrips(g.list.map(([t]) => t)).map(t => g.list.find(([x]) => x === t));
       const active = sorted.filter(([t]) => !info(t).past), past = sorted.filter(([t]) => info(t).past);
       const body = active.length ? active.map(([t, k]) => cardHtml(t, k)).join("")
-        : `<div class="empty">${PLANE}אין כרגע נסיעות ${esc(g.type)}</div>`;
+        : `<div class="empty">${PLANE}${g.type === "שליחים" ? "אין כרגע שליחים" : `אין כרגע נסיעות ${esc(g.type)}`}</div>`;
       const pastHtml = past.length ? `<details class="past"><summary>${past.length === 1 ? "נסיעה אחת שהסתיימה" : `${past.length} נסיעות שהסתיימו`}</summary>${past.map(([t, k]) => cardHtml(t, k)).join("")}</details>` : "";
       return `<section class="group"><div class="group-head"><h2>${esc(g.type)}</h2><span class="count">${active.length} ${active.length === 1 ? "נסיעה" : "נסיעות"}</span></div>${body}${pastHtml}</section>`;
     }).join("") + (unassigned.length && !lockedType ? `<p class="unassigned">⚠ בלשונית המשתתפים יש שמות של נסיעות שלא נמצאו: ${unassigned.map(esc).join(", ")}. כדאי לבדוק שהשם כתוב בדיוק כמו בלשונית הנסיעות.</p>` : "");
@@ -373,8 +592,33 @@
       return;
     }
     if (new URLSearchParams(location.search).get("t") !== null) return;
+    const add = e.target.closest("[data-add]");
+    if (add) { const box = add.closest("[data-settle]"); box.querySelector('[data-f="exps"]').insertAdjacentHTML("beforeend", expRow()); refreshForm(box); return; }
+    const del = e.target.closest("[data-del]");
+    if (del) { const box = del.closest("[data-settle]"); del.closest(".exp").remove(); refreshForm(box); return; }
+    const wa = e.target.closest("[data-wa]");
+    if (wa) { sendWhatsApp(wa.closest("[data-settle]"), trips[+wa.dataset.wa]); return; }
     const tg = e.target.closest("[data-toggle]");
-    if (tg) { const k = +tg.dataset.toggle; opened.has(k) ? opened.delete(k) : opened.add(k); render(); }
+    if (tg) {
+      const k = +tg.dataset.toggle, card = tg.closest(".card");
+      opened.has(k) ? opened.delete(k) : opened.add(k);
+      const isOpen = opened.has(k);
+      card.classList.toggle("expanded", isOpen);
+      tg.setAttribute("aria-expanded", isOpen);
+      const hint = card.querySelector(".more-hint"); if (hint) hint.textContent = isOpen ? "הסתרת הפרטים" : "לחיצה לפרטים המלאים";
+    }
+  });
+  document.addEventListener("input", e => {
+    const calc = e.target.closest("[data-calc]");
+    if (calc) runCalc(calc);
+    const box = e.target.closest("[data-settle]");
+    if (box) refreshForm(box);
+  });
+  document.addEventListener("change", e => {
+    const calc = e.target.closest("[data-calc]");
+    if (calc) runCalc(calc);
+    const box = e.target.closest("[data-settle]");
+    if (box) refreshForm(box);
   });
   document.addEventListener("keydown", e => {
     const tg = e.target.closest && e.target.closest("[data-toggle]");
@@ -405,7 +649,7 @@
   function sheetToTrips(rows, type) {
     const head = (rows[0] || []).map(h => h.trim());
     const col = n => head.indexOf(n);
-    const c = { name: col("שם הנסיעה"), start: col("תאריך יציאה"), end: col("תאריך חזרה"), dest: col("יעד"), notes: col("הערות"), people: col("משתתפים") };
+    const c = { name: col("שם הנסיעה"), start: col("תאריך יציאה"), end: col("תאריך חזרה"), dest: col("יעד"), notes: col("הערות"), people: col("משתתפים"), summary: col("סיכום נסיעה") };
     if (c.name < 0) throw new Error(`בגיליון ${type} אין עמודה בשם "שם הנסיעה" בשורה הראשונה.`);
     const aCols = [], dCols = [];
     head.forEach((h, k) => {
@@ -418,7 +662,7 @@
     const get = (r, k) => (k >= 0 && r[k] != null ? String(r[k]).trim() : "");
     return rows.slice(1).filter(r => get(r, c.name)).map(r => ({
       type, name: get(r, c.name), start: normDate(get(r, c.start)), end: normDate(get(r, c.end)),
-      destination: get(r, c.dest), notes: get(r, c.notes),
+      destination: get(r, c.dest), notes: get(r, c.notes), summary: get(r, c.summary),
       participants: get(r, c.people).split(/[\n,]+/).map(x => x.trim()).filter(Boolean).map(x => {
         const m = x.match(/^(.*?)\s*[-–:]\s*(יש|אין)\s*$/);
         return m ? { name: m[1].trim(), visa: m[2] } : { name: x, visa: "אין" };
@@ -455,7 +699,8 @@
   async function loadData() {
     const sheets = [
       [typeof SHEET_CSV_URL !== "undefined" ? SHEET_CSV_URL.trim() : "", TYPES[0]],
-      [typeof SHEET_CSV_URL_NASAH !== "undefined" ? SHEET_CSV_URL_NASAH.trim() : "", TYPES[1]]
+      [typeof SHEET_CSV_URL_NASAH !== "undefined" ? SHEET_CSV_URL_NASAH.trim() : "", TYPES[1]],
+      [typeof SHEET_CSV_URL_SHLICHIM !== "undefined" ? SHEET_CSV_URL_SHLICHIM.trim() : "", TYPES[2]]
     ].filter(([u]) => u);
     const fileTrips = typeof TRIPS !== "undefined" ? TRIPS : null;
     if (sheets.length) {
@@ -483,11 +728,17 @@
   }
 
   // טוען תמיד את הגרסה העדכנית של data.js (בלי זיכרון של הדפדפן)
+  const ratesScript = document.createElement("script");
+  ratesScript.src = "rates.js?v=" + Date.now();
+  ratesScript.onload = () => { if (hasRates()) document.getElementById("countries").innerHTML = RATES.filter((r, j, a) => a.findIndex(x => x[1] === r[1]) === j).map(r => `<option value="${esc(countryLabel(r))}">`).join(""); };
   const dataScript = document.createElement("script");
   dataScript.src = "data.js?v=" + Date.now();
   dataScript.onload = loadData;
   dataScript.onerror = loadData;
-  document.body.appendChild(dataScript);
+  ratesScript.onerror = () => document.body.appendChild(dataScript);
+  const fillCountries = ratesScript.onload;
+  ratesScript.onload = () => { fillCountries(); document.body.appendChild(dataScript); };
+  document.body.appendChild(ratesScript);
 </script>
 </body>
 </html>
