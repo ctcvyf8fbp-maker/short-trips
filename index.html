@@ -143,13 +143,18 @@
   .tbl td { border: 1px solid #333; padding: 3px 4px; vertical-align: middle; text-align: center; }
   .tbl td.type { width: 17%; text-align: start; font-weight: 600; vertical-align: top; padding: 6px; }
   .tbl td.note { width: 34%; text-align: start; font-size: 12.5px; line-height: 1.45; vertical-align: top; padding: 6px; }
-  .tbl td.m { width: 6%; } .tbl td.m input { width: 17px; height: 17px; accent-color: #0F6B5C; }
+  .tbl td.m { width: 8%; white-space: nowrap; }
+  .tbl td.m input[type="checkbox"] { width: 17px; height: 17px; accent-color: #0F6B5C; vertical-align: middle; }
+  .meal { display: inline-flex; align-items: center; gap: 3px; }
+  .cnt { width: 36px; border: 1px solid #9bb; border-radius: 4px; background: #F3F8F6; color: #0b2a6b; font: inherit; font-size: 13px; text-align: center; padding: 1px 2px; }
   .tbl input.cell { width: 100%; min-width: 0; border: 0; background: #F3F8F6; color: #0b2a6b; font: inherit; padding: 4px; text-align: center; }
   .tbl tbody[data-group="food"] td.type, .tbl tbody[data-group="taxiIL"] td.type, .tbl tbody[data-group="taxiAbroad"] td.type { background: #f4f4f4; }
   .add-line { display: block; margin-top: 6px; border: 1px dashed #0F6B5C; color: #0F6B5C; background: #fff; border-radius: 6px; font-size: 12px; padding: 2px 8px; cursor: pointer; }
   .decl-title { text-align: center; margin-top: 4px; }
   .actions-box { background: var(--card); border-radius: 16px; box-shadow: var(--shadow); padding: 16px 20px; }
   .actions-box .check { margin-top: 0; }
+  .alert-box { margin-top: 10px; background: var(--hot-soft); color: var(--hot); font-weight: 700; border-radius: 10px; padding: 10px 12px; }
+  .need { outline: 3px solid var(--hot) !important; outline-offset: 2px; }
   .tip { margin: 10px 0 0; font-size: .92rem; background: var(--main-soft); color: var(--ink); border-radius: 10px; padding: 10px 12px; }
   .tip:empty { display: none; }
   .draft-line { margin: 10px 0 0; font-size: .85rem; color: var(--muted); }
@@ -167,6 +172,8 @@
     input.ln, .tbl input.cell, canvas.sig { background: transparent !important; }
     input[type="date"]:invalid, input[type="time"]:invalid { color: transparent; }
     input::-webkit-calendar-picker-indicator { display: none; }
+    .cnt { border: 0; background: transparent; width: 22px; -moz-appearance: textfield; }
+    .cnt::-webkit-inner-spin-button, .cnt::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     .sig-clear { display: none !important; }
     .tbl tr { break-inside: avoid; }
     .paper { font-size: 11pt; line-height: 1.5; }
@@ -284,6 +291,23 @@
   const todayIso = () => { const t = today(); return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`; };
   function openWhatsApp(text) { window.open(`https://wa.me/${waNumber()}?text=${encodeURIComponent(text)}`, "_blank", "noopener"); }
   function say(box, text, ok) { const m = box.querySelector("[data-msg]"); m.className = "msg " + (ok ? "ok" : "bad"); m.textContent = text; }
+  // הודעת שגיאה בולטת + גלילה לשדה החסר
+  function need(box, text, el) {
+    say(box, "");
+    const b = box.querySelector("[data-alert]");
+    b.textContent = text; b.hidden = false;
+    if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.classList.add("need"); setTimeout(() => el.classList.remove("need"), 2500); if (el.focus) el.focus({ preventScroll: true }); }
+    else b.scrollIntoView({ behavior: "smooth", block: "center" });
+    return false;
+  }
+  function checkForm(kind, form, box, forText) {
+    box.querySelector("[data-alert]").hidden = true;
+    if (!val(form, "name")) return need(box, "חסר שם הנוסע/ת בראש הטופס.", form.querySelector('[data-f="name"]'));
+    if (!val(form, "id")) return need(box, "חסר מספר תעודת זהות בראש הטופס.", form.querySelector('[data-f="id"]'));
+    if (kind === "advance" && !box.querySelector('[data-a="ticket"]').checked) return need(box, "לבקשת מקדמה חובה לצרף כרטיס טיסה. יש לסמן שהוא יצורף.", box.querySelector('[data-a="ticket"]').closest("label"));
+    if (forText && !signed(form, "main")) return need(box, "חסרה חתימה בתחתית הטופס.", form.querySelector('[data-sig="main"]'));
+    return true;
+  }
 
   // שורת פרטי הנוסע כמו בטופס המקורי (משותפת למקדמה ולהתחשבנות)
   function travelerBlock(extraLine = "") {
@@ -381,6 +405,7 @@
           <button class="btn line" data-send="advance">שליחת סיכום בטקסט</button>
           <span data-msg></span>
         </div>
+        <div class="alert-box" data-alert role="alert" hidden></div>
         <p class="tip" data-tip></p>
         <p class="draft-line"><span data-saved>הטופס נשמר אוטומטית במכשיר הזה בלבד, אפשר לסגור ולחזור אליו.</span> <button type="button" class="link-btn" data-clear="advance">ניקוי הטופס</button></p>
         <p class="fine">בנוסף לטופס שולחים באותו צ'אט: כרטיס טיסה, צילום כרטיס האשראי האישי משני הצדדים וטופס ניהול חשבון.</p>
@@ -406,7 +431,7 @@
   const SETTLE_DECL = 'אני הח"מ מצהיר בזאת כי הקבלות וההוצאות שהצגתי בפני אגף הכספים/חטיבת פרט והסדרי נסיעות חו"ל הינן הוצאות שהוצאו בפועל במסגרת נסיעתי בתפקיד בלבד.';
   const SETTLE_DECL2 = "הנני מודע לכך כי במקרה הפרטים הנ\"ל אינם נכונים אדרש להשיב את הכספים ששולמו לי ביתר ועלול להיפתח נגדי הליך משמעתי.";
   function entryRow(row, first) {
-    const meal = n => row.meals ? `<input type="checkbox" data-m="${n}" aria-label="${n}">` : "";
+    const meal = n => row.meals ? `<span class="meal"><input type="checkbox" data-m="${n}" aria-label="${n}"><input type="number" class="cnt" data-cnt="${n}" min="1" max="9" value="1" inputmode="numeric" aria-label="כמה ארוחות ${n}" hidden></span>` : "";
     return `<tr data-row="${row.key}">
       ${first ? `<td class="type" rowspan="1">${esc(row.type)}<button type="button" class="add-line no-print" data-addline="${row.key}">+ שורה</button></td>` : ""}
       <td><input class="cell" type="date" data-c="date" required aria-label="תאריך"></td>
@@ -417,7 +442,7 @@
   }
   function settleHtml() {
     return `
-      <div class="callout no-print" data-due>את ההתחשבנות מגישים <b>עד חודש מיום החזרה ארצה</b>. אחרי שממלאים את תאריך החזרה, יופיע כאן המועד האחרון.</div>
+      <div class="callout no-print">את ההתחשבנות מגישים <b>עד חודש מיום החזרה ארצה</b>.</div>
       <div class="callout warn no-print"><b>מצרפים לטופס:</b><ul><li>קבלות סרוקות</li><li>אישור ניהול חשבון בנק</li><li>צילום כרטיס אשראי משני הצדדים</li></ul></div>
       <p class="hint no-print">ממלאים ישירות על הטופס. בכל סעיף אפשר להוסיף שורות עם "+ שורה". <a href="settlement-form.jpg" target="_blank" rel="noopener">לצפייה בטופס המקורי</a> · <a href="settlement-form.pdf" target="_blank" rel="noopener" download>הורדת המקור (PDF)</a></p>
       <div class="paper-scroll"><div data-form="settle">
@@ -443,6 +468,7 @@
           <button class="btn line" data-send="settle">שליחת סיכום בטקסט</button>
           <span data-msg></span>
         </div>
+        <div class="alert-box" data-alert role="alert" hidden></div>
         <p class="tip" data-tip></p>
         <p class="draft-line"><span data-saved>הטופס נשמר אוטומטית במכשיר הזה בלבד, אפשר לסגור ולחזור אליו.</span> <button type="button" class="link-btn" data-clear="settle">ניקוי הטופס</button></p>
         <p class="fine">בנוסף לטופס שולחים באותו צ'אט: קבלות סרוקות, אישור ניהול חשבון בנק וצילום כרטיס אשראי משני הצדדים.</p>
@@ -458,20 +484,12 @@
     const out = [];
     SETTLE_ROWS.forEach(r => box.querySelectorAll(`tr[data-row="${r.key}"]`).forEach(tr => {
       const date = tr.querySelector('[data-c="date"]').value, amount = tr.querySelector('[data-c="amount"]').value.trim();
-      const meals = [...tr.querySelectorAll("[data-m]")].filter(x => x.checked).map(x => x.dataset.m);
+      const meals = [...tr.querySelectorAll("[data-m]")].filter(x => x.checked).map(x => { const c = +(tr.querySelector(`[data-cnt="${x.dataset.m}"]`).value) || 1; return c > 1 ? `${x.dataset.m} ×${c}` : x.dataset.m; });
       if (date || amount || meals.length) out.push({ type: r.type.split(" ")[0] === "כלכלה" ? "כלכלה" : r.type, date, amount, meals });
     }));
     return out;
   }
-  function refreshSettle(box) {
-    const back = parse(val(box, "back")), due = document.querySelector("[data-due]");
-    if (back && due) {
-      const d = new Date(back); d.setMonth(d.getMonth() + 1);
-      const left = Math.round((d - today()) / 86400000);
-      due.className = "callout no-print" + (left < 0 ? " bad" : "");
-      due.innerHTML = left < 0 ? `המועד להגשת ההתחשבנות עבר (${fmtD(d)}).` : `את ההתחשבנות מגישים <b>עד ${fmtD(d)}</b>, חודש מיום החזרה${left <= 31 ? `. נשארו ${left} ימים` : ""}.`;
-    }
-  }
+  function refreshSettle(box) {}
   function settleText(box) {
     const lines = [`*התחשבנות לאחר נסיעת חו"ל בתפקיד*`, `תאריך: ${fmt(val(box, "date"))}`, ...travelerLines(box),
       val(box, "advance") ? `נמשכה מקדמה בסכום של: ${val(box, "advance")}` : "", "", "*הוצאות:*"];
@@ -502,7 +520,8 @@
     form.querySelectorAll("tbody[data-group]").forEach(tb => {
       d.rows[tb.dataset.group] = [...tb.rows].map(tr => ({
         date: tr.querySelector('[data-c="date"]').value, amount: tr.querySelector('[data-c="amount"]').value,
-        meals: [...tr.querySelectorAll("[data-m]")].filter(x => x.checked).map(x => x.dataset.m)
+        meals: [...tr.querySelectorAll("[data-m]")].filter(x => x.checked).map(x => x.dataset.m),
+        counts: Object.fromEntries([...tr.querySelectorAll("[data-cnt]")].map(x => [x.dataset.cnt, x.value]))
       }));
     });
     const actions = document.querySelector(`[data-actions="${kind}"]`);
@@ -523,6 +542,7 @@
         tr.querySelector('[data-c="date"]').value = x.date || "";
         tr.querySelector('[data-c="amount"]').value = x.amount || "";
         tr.querySelectorAll("[data-m]").forEach(m => m.checked = (x.meals || []).includes(m.dataset.m));
+        tr.querySelectorAll("[data-cnt]").forEach(c => { if (x.counts && x.counts[c.dataset.cnt]) c.value = x.counts[c.dataset.cnt]; c.hidden = !tr.querySelector(`[data-m="${c.dataset.cnt}"]`).checked; });
       });
     });
     fixRowspans(form);
@@ -595,26 +615,28 @@
     const send = e.target.closest("[data-send]");
     if (send) {
       const kind = send.dataset.send, form = document.querySelector(`[data-form="${kind}"]`), box = send.closest("[data-actions]");
-      if (!val(form, "name") || !val(form, "id")) { say(box, "חסרים שם ומספר תעודת זהות בראש הטופס."); return; }
-      if (kind === "advance" && !box.querySelector('[data-a="ticket"]').checked) { say(box, "לבקשת מקדמה חובה לצרף כרטיס טיסה. יש לסמן שהוא יצורף."); return; }
-      if (!signed(form, "main")) { say(box, "חסרה חתימה בתחתית הטופס."); return; }
-      openWhatsApp(kind === "advance" ? advanceText(form) : settleText(form));
+      if (!checkForm(kind, form, box, true)) return;
+      const url = `https://wa.me/${waNumber()}?text=${encodeURIComponent(kind === "advance" ? advanceText(form) : settleText(form))}`;
+      const w = window.open(url, "_blank");
+      if (!w) location.href = url;
       say(box, "נפתח וואטסאפ. לא לשכוח לצרף את ה-PDF ואת המסמכים.", true);
       return;
     }
     const pr = e.target.closest("[data-print]");
     if (pr) {
       const kind = pr.dataset.print, form = document.querySelector(`[data-form="${kind}"]`), box = pr.closest("[data-actions]");
-      if (!val(form, "name") || !val(form, "id")) { say(box, "חסרים שם ומספר תעודת זהות בראש הטופס."); return; }
-      if (kind === "advance" && !box.querySelector('[data-a="ticket"]').checked) { say(box, "לבקשת מקדמה חובה לצרף כרטיס טיסה. יש לסמן שהוא יצורף."); return; }
+      if (!checkForm(kind, form, box, false)) return;
       if (!signed(form, "main") && !confirm("לא חתמת על הטופס. להמשיך בלי חתימה (למשל כדי לחתום ביד אחרי ההדפסה)?")) return;
       const tip = box.querySelector("[data-tip]");
       tip.textContent = IS_IOS ? "במסך שנפתח לוחצים על סמל השיתוף (⬆︎) למעלה, ובוחרים וואטסאפ. הטופס יישלח כקובץ PDF."
         : IS_ANDROID ? "במסך שנפתח בוחרים \"שמירה כ-PDF\", ואחרי השמירה לוחצים \"שיתוף\" ובוחרים וואטסאפ."
         : "במסך שנפתח בוחרים \"שמירה כ-PDF\" (Save as PDF), ואז שולחים את הקובץ בוואטסאפ.";
       say(box, "", true);
+      saveDraft(form);
+      const oldTitle = document.title;
       document.title = (kind === "advance" ? "מקדמה" : "התחשבנות") + " - " + (val(form, "name") || "טופס");
-      setTimeout(() => { window.print(); document.title = DOCS.find(x => x.id === kind).title; }, 50);
+      window.print();
+      document.title = oldTitle;
       return;
     }
     const cl = e.target.closest("[data-clear]");
@@ -631,6 +653,10 @@
     const form = e.target.closest("[data-form]");
     if (!form) return;
     if (e.target.dataset && e.target.dataset.f) { if (MIRRORS[e.target.dataset.f]) mirror(form, e.target); else delete e.target.dataset.auto; }
+    if (e.target.dataset && e.target.dataset.m) {
+      const c = e.target.closest("td").querySelector(`[data-cnt="${e.target.dataset.m}"]`);
+      if (c) { c.hidden = !e.target.checked; if (e.target.checked && !c.value) c.value = 1; }
+    }
     if (form.dataset.form === "settle") refreshSettle(form);
     scheduleSave(form);
   }
