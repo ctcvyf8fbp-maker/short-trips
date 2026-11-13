@@ -151,6 +151,7 @@
   .tbl tbody[data-group="food"] td.type, .tbl tbody[data-group="taxiIL"] td.type, .tbl tbody[data-group="taxiAbroad"] td.type { background: #f4f4f4; }
   .add-line { display: block; margin-top: 6px; border: 1px dashed #0F6B5C; color: #0F6B5C; background: #fff; border-radius: 6px; font-size: 12px; padding: 2px 8px; cursor: pointer; }
   .decl-title { text-align: center; margin-top: 4px; }
+  .swipe { display: none; font-size: 13px; color: #0F6B5C; margin: 0 0 4px; }
   .actions-box { background: var(--card); border-radius: 16px; box-shadow: var(--shadow); padding: 16px 20px; }
   .actions-box .check { margin-top: 0; }
   .alert-box { margin-top: 10px; background: var(--hot-soft); color: var(--hot); font-weight: 700; border-radius: 10px; padding: 10px 12px; }
@@ -159,6 +160,28 @@
   .tip:empty { display: none; }
   .draft-line { margin: 10px 0 0; font-size: .85rem; color: var(--muted); }
   .link-btn { border: 0; background: none; color: var(--hot); text-decoration: underline; cursor: pointer; font-size: inherit; padding: 0; }
+
+  /* טלפון: הטופס מתאים את עצמו לרוחב המסך */
+  @media screen and (max-width: 700px) {
+    .paper-scroll { overflow: visible; margin: 0 0 14px; padding: 0; }
+    .paper { min-width: 0; padding: 20px 14px; font-size: 15px; line-height: 1.7; border-radius: 10px; }
+    .paper h4 { font-size: 17px; }
+    .paper .fl { line-height: 2.2; }
+    input.ln { font-size: 16px; max-width: 100%; height: 30px; }
+    input.ln.w1 { width: 96px; } input.ln.w2 { width: 150px; } input.ln.w3 { width: 100%; }
+    .paper .opt label { display: flex; margin: 6px 0 0; white-space: normal; gap: 6px; }
+    .sign-row { flex-wrap: wrap; gap: 18px; }
+    .sign-row > div { flex: 1 1 100%; }
+    .sign-row.two > div { flex: 1 1 100%; }
+    .sig-wrap, canvas.sig { width: 100%; }
+    canvas.sig { height: 80px; }
+    .tbl-wrap { margin: 0 -14px; padding: 0 14px; }
+    .swipe { display: block; }
+    .tbl { min-width: 620px; font-size: 13px; }
+    .tbl input.cell { font-size: 16px; }
+    .cnt { font-size: 16px; }
+    .doc-head h2 { font-size: 1.5rem; }
+  }
 
   /* הדפסה ושמירה כ-PDF: רק הטופס, בפורמט המקורי */
   @page { size: A4; margin: 12mm; }
@@ -451,6 +474,7 @@
         <h4>התחשבנות לאחר נסיעת חו"ל בתפקיד</h4>
         ${travelerBlock(`<p class="fl">נמשכה מקדמה בסכום של ${inp("advance", "w3")}</p>`)}
         <p>ההוצאות בפועל המפורטות להלן הינן הוצאות לזמן השהות בתפקיד בלבד:</p>
+        <p class="swipe no-print">↔ בטבלה אפשר לגלול הצידה</p>
         <div class="tbl-wrap"><table class="tbl">
           <thead><tr><th>סוג ההוצאה</th><th>תאריך</th><th>בוקר</th><th>צהריים</th><th>ערב</th><th>סכום</th><th>הערות</th></tr></thead>
           ${SETTLE_ROWS.map(r => `<tbody data-group="${r.key}">${entryRow(r, true)}</tbody>`).join("")}
