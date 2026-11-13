@@ -153,6 +153,9 @@
   details.fold > summary::after { content: " ▾"; color: var(--muted); }
   details.fold[open] > summary::after { content: " ▴"; }
   details.fold > .in { padding: 0 14px 14px; }
+  .form-img { display: block; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; max-height: 70vh; overflow-y: auto; }
+  .form-img img { display: block; width: 100%; height: auto; }
+  a.ghost { text-decoration: none; display: inline-block; }
   .rules { width: 100%; border-collapse: collapse; font-size: .9rem; }
   .rules th, .rules td { text-align: start; padding: 8px 6px; border-top: 1px solid var(--soft); vertical-align: top; }
   .rules th { width: 34%; }
@@ -383,9 +386,13 @@
         <ul><li>קבלות סרוקות</li><li>אישור ניהול חשבון בנק</li><li>צילום כרטיס אשראי משני הצדדים</li></ul>
       </div>
       <details class="fold"><summary>1. קריאת הטופס לפני המילוי</summary><div class="in">
-        <p style="margin-top:0">ההוצאות שמפרטים בטופס הן הוצאות בפועל לזמן השהות בתפקיד בלבד.</p>
-        <table class="rules"><tbody>${EXPENSES.map(e => `<tr><th>${esc(e[0])}</th><td>${esc(e[1])}</td></tr>`).join("")}</tbody></table>
-        <p class="decl"><b>הצהרה:</b> ${esc(DECLARATION)}</p>
+        <a class="form-img" href="settlement-form.jpg" target="_blank" rel="noopener" title="פתיחת הטופס בגודל מלא">
+          <img src="settlement-form.jpg" alt="טופס התחשבנות לאחר נסיעת חו&quot;ל בתפקיד" loading="lazy">
+        </a>
+        <div class="row-btns">
+          <a class="ghost" href="settlement-form.jpg" target="_blank" rel="noopener">הגדלת הטופס</a>
+          <a class="ghost" href="settlement-form.pdf" target="_blank" rel="noopener" download>הורדת הטופס (PDF)</a>
+        </div>
       </div></details>
       <details class="fold"><summary>2. מילוי מקוון ושליחה בוואטסאפ</summary><div class="in">
         <div class="form-grid">
