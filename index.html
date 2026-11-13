@@ -159,6 +159,7 @@
   .tip { margin: 10px 0 0; font-size: .92rem; background: var(--main-soft); color: var(--ink); border-radius: 10px; padding: 10px 12px; }
   .tip:empty { display: none; }
   .draft-line { margin: 10px 0 0; font-size: .85rem; color: var(--muted); }
+  .quiet-link { color: var(--muted) !important; }
   .link-btn { border: 0; background: none; color: var(--hot); text-decoration: underline; cursor: pointer; font-size: inherit; padding: 0; }
 
   /* טלפון: הטופס מתאים את עצמו לרוחב המסך */
@@ -323,6 +324,10 @@
     else b.scrollIntoView({ behavior: "smooth", block: "center" });
     return false;
   }
+  function downloadFile(file) {
+    const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = file.name;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  }
   function checkForm(kind, form, box, forText) {
     box.querySelector("[data-alert]").hidden = true;
     if (!val(form, "name")) return need(box, "חסר שם הנוסע/ת בראש הטופס.", form.querySelector('[data-f="name"]'));
@@ -430,7 +435,7 @@
         </div>
         <div class="alert-box" data-alert role="alert" hidden></div>
         <p class="tip" data-tip></p>
-        <p class="draft-line"><span data-saved>הטופס נשמר אוטומטית במכשיר הזה בלבד, אפשר לסגור ולחזור אליו.</span> <button type="button" class="link-btn" data-clear="advance">ניקוי הטופס</button></p>
+        <p class="draft-line"><span data-saved>הטופס נשמר אוטומטית במכשיר הזה בלבד, אפשר לסגור ולחזור אליו.</span> <button type="button" class="link-btn" data-clear="advance">ניקוי הטופס</button> · <button type="button" class="link-btn quiet-link" data-printpaper>הדפסה</button></p>
         <p class="fine">בנוסף לטופס שולחים באותו צ'אט: כרטיס טיסה, צילום כרטיס האשראי האישי משני הצדדים וטופס ניהול חשבון.</p>
       </div>`;
   }
@@ -494,7 +499,7 @@
         </div>
         <div class="alert-box" data-alert role="alert" hidden></div>
         <p class="tip" data-tip></p>
-        <p class="draft-line"><span data-saved>הטופס נשמר אוטומטית במכשיר הזה בלבד, אפשר לסגור ולחזור אליו.</span> <button type="button" class="link-btn" data-clear="settle">ניקוי הטופס</button></p>
+        <p class="draft-line"><span data-saved>הטופס נשמר אוטומטית במכשיר הזה בלבד, אפשר לסגור ולחזור אליו.</span> <button type="button" class="link-btn" data-clear="settle">ניקוי הטופס</button> · <button type="button" class="link-btn quiet-link" data-printpaper>הדפסה</button></p>
         <p class="fine">בנוסף לטופס שולחים באותו צ'אט: קבלות סרוקות, אישור ניהול חשבון בנק וצילום כרטיס אשראי משני הצדדים.</p>
       </div>`;
   }
@@ -523,6 +528,201 @@
     lines.push("", "✓ הצהרתי כי ההוצאות הוצאו בפועל במסגרת נסיעתי בתפקיד בלבד.", `חתימה: ${val(box, "signName") || val(box, "name")}`, "",
       "מצורפים בהודעות הבאות: הטופס החתום (PDF), קבלות סרוקות, אישור ניהול חשבון בנק, צילום כרטיס אשראי משני הצדדים.");
     return lines.filter((x, i, a) => !(x === "" && a[i - 1] === "")).join("\n");
+  }
+
+  // =====================================================================
+  //  יצירת PDF בתוך הדפדפן, בלי ספריות חיצוניות:
+  //  מציירים את הטופס על קנבס (A4, 150dpi) ועוטפים את התמונות בקובץ PDF.
+  // =====================================================================
+  const PW = 1240, PH = 1754, M = 80, RIGHT = PW - M, LEFT = M, INK = "#111", BLUE = "#0b2a6b";
+  function newPage() {
+    const c = document.createElement("canvas");
+    c.width = PW; c.height = PH; c.dir = "rtl";
+    c.style.cssText = "position:fixed;left:-99999px;top:0;width:10px;height:10px";
+    document.body.appendChild(c);
+    const g = c.getContext("2d");
+    g.fillStyle = "#fff"; g.fillRect(0, 0, PW, PH);
+    try { g.direction = "rtl"; } catch (_) {}
+    g.textBaseline = "alphabetic";
+    return { c, g, y: M };
+  }
+  const FONT = '"Arial", "Arial Hebrew", "Helvetica", sans-serif';
+  function font(g, size, bold) { g.font = `${bold ? "bold " : ""}${size}px ${FONT}`; }
+  function txt(p, s, x, y, o = {}) {
+    const g = p.g; font(g, o.size || 24, o.bold); g.fillStyle = o.color || INK; g.textAlign = o.align || "right";
+    const noHeb = !/[\u0590-\u05FF]/.test(s);
+    if (noHeb) { try { g.direction = "ltr"; } catch (_) {} }
+    g.fillText(s, x, y);
+    if (noHeb) { try { g.direction = "rtl"; } catch (_) {} }
+    if (o.underline) {
+      const w = g.measureText(s).width, x0 = o.align === "center" ? x - w / 2 : o.align === "left" ? x : x - w;
+      g.fillRect(x0, y + 4, w, 2);
+    }
+    return g.measureText(s).width;
+  }
+  function wrap(p, s, o = {}) {
+    const g = p.g, size = o.size || 24, lh = o.lh || size * 1.55, xr = o.right || RIGHT, width = o.width || (RIGHT - LEFT);
+    font(g, size, o.bold);
+    const words = String(s).split(/\s+/); let line = "";
+    const flush = () => { if (line) { txt(p, line, xr, p.y, { size, bold: o.bold, color: o.color }); p.y += lh; line = ""; } };
+    words.forEach(w => { const t = line ? line + " " + w : w; if (g.measureText(t).width > width && line) { flush(); line = w; } else line = t; });
+    flush();
+    p.y += o.after ?? 6;
+  }
+  // שורת שדות: [[תווית, ערך, רוחב יחסי], ...] מימין לשמאל
+  function fieldRow(p, fields, o = {}) {
+    const g = p.g, size = o.size || 22, total = fields.reduce((a, f) => a + (f[2] || 1), 0), span = RIGHT - LEFT;
+    let x = RIGHT;
+    fields.forEach(([label, value, w = 1]) => {
+      const cw = span * w / total;
+      if (!label) { x -= cw; return; }
+      const lw = txt(p, label + ":", x, p.y, { size });
+      const x1 = x - lw - 10, x0 = x - cw + 18;
+      g.fillStyle = INK; g.fillRect(x0, p.y + 6, Math.max(20, x1 - x0), 1.5);
+      if (value) { g.save(); g.beginPath(); g.rect(x0, p.y - size - 4, x1 - x0, size + 14); g.clip(); txt(p, value, x1 - 4, p.y, { size, color: BLUE }); g.restore(); }
+      x -= cw;
+    });
+    p.y += o.lh || 50;
+  }
+  function box(p, x, y, size, on) {
+    const g = p.g; g.save(); g.strokeStyle = INK; g.lineWidth = 2; g.strokeRect(x, y, size, size);
+    if (on) { g.strokeStyle = BLUE; g.lineWidth = 3; g.beginPath(); g.moveTo(x + size * .2, y + size * .55); g.lineTo(x + size * .42, y + size * .78); g.lineTo(x + size * .82, y + size * .22); g.stroke(); }
+    g.restore();
+  }
+  function sigImg(p, form, name, x, y, w, h) {
+    const c = form.querySelector(`[data-sig="${name}"]`);
+    if (c && c.dataset.signed) { const r = Math.min(w / c.width, h / c.height); p.g.drawImage(c, x + (w - c.width * r) / 2, y + (h - c.height * r), c.width * r, c.height * r); }
+  }
+  function sigLine(p, cols) { // [[תווית, ערך או פונקציה מציירת]]
+    const g = p.g, n = cols.length, gap = 40, cw = (RIGHT - LEFT - gap * (n - 1)) / n, top = p.y;
+    cols.forEach(([label, v], i) => {
+      const xr = RIGHT - i * (cw + gap), x0 = xr - cw;
+      if (typeof v === "function") v(x0, top, cw, 90); else if (v) txt(p, v, xr - cw / 2, top + 80, { size: 22, align: "center", color: BLUE });
+      g.fillStyle = INK; g.fillRect(x0, top + 94, cw, 1.5);
+      txt(p, label, xr - cw / 2, top + 124, { size: 20, align: "center" });
+    });
+    p.y = top + 160;
+  }
+  const dd = v => v ? fmt(v) : "";
+
+  function drawAdvance(form) {
+    const v = n => val(form, n), type = form.querySelector('input[name="advType"]:checked').value;
+    const p1 = newPage();
+    fieldRow(p1, [["תאריך", dd(v("date")), 1], ["", "", 2]], { lh: 52 });
+    txt(p1, "אל: משרד הביטחון - אגף הכספים", RIGHT, p1.y, { size: 24, underline: true }); p1.y += 60;
+    txt(p1, ADV_TITLE, PW / 2, p1.y, { size: 30, bold: true, align: "center", underline: true }); p1.y += 66;
+    fieldRow(p1, [["שם הנוסע/ת", v("name"), 1.3], ["מספר תעודת זהות", v("id"), 1.2], ["יעד", v("dest"), 0.9]]);
+    fieldRow(p1, [["תאריך יציאה מהארץ", dd(v("out")), 1.25], ["שעת המראה", v("outTime"), .8], ["תאריך חזרה לארץ", dd(v("back")), 1.2], ["שעת נחיתה", v("backTime"), .8]]);
+    fieldRow(p1, [["דרגה / תפקיד", v("rank"), 1], ["מס' נייד", v("phone"), 1], ["כתובת מייל", v("email"), 1.3]], { lh: 64 });
+    wrap(p1, 'אבקש ממשרד הביטחון להעביר לי הרשאה למשיכת מזומן/כרטיס אשראי עבור שהותי בתפקיד בחו"ל עפ"י הקצובה שנקבעה ע"י החשכ"ל.', { after: 14 });
+    const wLabel = txt(p1, "אופן קבלת המקדמה:", RIGHT, p1.y, { size: 24, bold: true });
+    let x = RIGHT - wLabel - 24;
+    [["הקצאה בכרטיס אשראי"], [ADV_CASH]].forEach(([opt]) => {
+      box(p1, x - 26, p1.y - 22, 26, type === opt); const w = txt(p1, opt, x - 36, p1.y, { size: 24 }); x -= w + 90;
+    });
+    p1.y += 54;
+    ADV_TERMS.forEach(t => wrap(p1, t, { after: 12 }));
+    const p2 = newPage();
+    ADV_VACATION.forEach(t => wrap(p2, t, { after: 12 }));
+    wrap(p2, ADV_DECL, { bold: true, after: 30 });
+    sigLine(p2, [["תאריך", dd(v("signDate"))], ["שם פרטי + משפחה", v("signName")], ["חתימה", (x0, y0, w, h) => sigImg(p2, form, "main", x0, y0, w, h)]]);
+    p2.y += 20;
+    txt(p2, 'מצ"ב טופס ניהול חשבון', RIGHT, p2.y, { size: 24, bold: true }); p2.y += 56;
+    txt(p2, "ייפוי כוח (במידה והכסף נמשך עבורי באמצעות אדם אחר):", RIGHT, p2.y, { size: 24, bold: true, underline: true }); p2.y += 50;
+    const blank = s => s || "____________";
+    wrap(p2, `אני (ת.ז) ${blank(v("poaMyId"))} (שם פרטי + משפחה) ${blank(v("poaMyName"))} מייפה את כוחו של (שם פרטי + משפחה) ${blank(v("poaName"))} (ת.ז) ${blank(v("poaId"))} לקחת בשמי ובמקומי את שובר המקדמה לבנק ולמשוך עבורי את הכסף מהבנק.`, { after: 8 });
+    wrap(p2, "בזאת, אני לוקח את האחריות על השובר והכסף ולא תהיה לי כל טענה למשרד הביטחון בעניין.", { after: 20 });
+    sigLine(p2, [["חתימת הנוסע", (x0, y0, w, h) => sigImg(p2, form, "poaTraveler", x0, y0, w, h)], ["חתימת המיופה", (x0, y0, w, h) => sigImg(p2, form, "poaAgent", x0, y0, w, h)]]);
+    return [p1, p2];
+  }
+
+  function drawSettle(form) {
+    const v = n => val(form, n), p = newPage(), g = p.g;
+    fieldRow(p, [["", "", 2], ["תאריך", dd(v("date")), 1]], { lh: 56 });
+    txt(p, 'התחשבנות לאחר נסיעת חו"ל בתפקיד', PW / 2, p.y, { size: 30, bold: true, align: "center", underline: true }); p.y += 60;
+    fieldRow(p, [["שם הנוסע/ת", v("name"), 1.3], ["מספר תעודת זהות", v("id"), 1.2], ["יעד", v("dest"), 0.9]], { lh: 46 });
+    fieldRow(p, [["תאריך יציאה מהארץ", dd(v("out")), 1.25], ["שעת המראה", v("outTime"), .8], ["תאריך חזרה לארץ", dd(v("back")), 1.2], ["שעת נחיתה", v("backTime"), .8]], { lh: 46 });
+    fieldRow(p, [["דרגה / תפקיד", v("rank"), 1], ["מס' נייד", v("phone"), 1], ["כתובת מייל", v("email"), 1.3]], { lh: 46 });
+    fieldRow(p, [["נמשכה מקדמה בסכום של", v("advance"), 1.3], ["", "", 1.7]], { lh: 44 });
+    txt(p, "ההוצאות בפועל המפורטות להלן הינן הוצאות לזמן השהות בתפקיד בלבד:", RIGHT, p.y, { size: 22 }); p.y += 22;
+    // טבלה
+    const cols = [["סוג ההוצאה", 190], ["תאריך", 150], ["בוקר", 72], ["צהריים", 82], ["ערב", 72], ["סכום", 130], ["הערות", 0]];
+    const used = cols.reduce((a, c) => a + c[1], 0); cols[6][1] = RIGHT - LEFT - used;
+    const xs = []; { let x = RIGHT; cols.forEach(c => { xs.push(x); x -= c[1]; }); xs.push(LEFT); }
+    const hy = p.y, hh = 44;
+    g.strokeStyle = INK; g.lineWidth = 1.5;
+    g.strokeRect(LEFT, hy, RIGHT - LEFT, hh);
+    cols.forEach((c, i) => { txt(p, c[0], xs[i] - c[1] / 2, hy + 30, { size: 19, bold: true, align: "center" }); if (i) { g.beginPath(); g.moveTo(xs[i], hy); g.lineTo(xs[i], hy + hh); g.stroke(); } });
+    let y = hy + hh;
+    const lines = (s, width, size) => { font(g, size); const out = []; let l = ""; String(s).split(/\s+/).forEach(w => { const t = l ? l + " " + w : w; if (g.measureText(t).width > width && l) { out.push(l); l = w; } else l = t; }); if (l) out.push(l); return out; };
+    SETTLE_ROWS.forEach(r => {
+      const trs = [...form.querySelectorAll(`tr[data-row="${r.key}"]`)];
+      const typeL = lines(r.type, cols[0][1] - 16, 18), noteL = lines(r.note, cols[6][1] - 16, 15);
+      const rowH = 36, minH = Math.max(typeL.length * 22 + 14, noteL.length * 19 + 14), h = Math.max(minH, trs.length * rowH);
+      const each = h / trs.length;
+      g.strokeRect(LEFT, y, RIGHT - LEFT, h);
+      [1, 6].forEach(i => { g.beginPath(); g.moveTo(xs[i], y); g.lineTo(xs[i], y + h); g.stroke(); });
+      typeL.forEach((l, k) => txt(p, l, xs[0] - 8, y + 24 + k * 22, { size: 18, bold: true }));
+      noteL.forEach((l, k) => txt(p, l, xs[6] - 8, y + 22 + k * 19, { size: 15 }));
+      trs.forEach((tr, k) => {
+        const ty = y + k * each;
+        if (k) { g.beginPath(); g.moveTo(xs[1], ty); g.lineTo(xs[6], ty); g.stroke(); }
+        [2, 3, 4, 5].forEach(i => { g.beginPath(); g.moveTo(xs[i], ty); g.lineTo(xs[i], ty + each); g.stroke(); });
+        const mid = ty + each / 2 + 7;
+        const date = tr.querySelector('[data-c="date"]').value, amount = tr.querySelector('[data-c="amount"]').value.trim();
+        if (date) txt(p, dd(date), xs[1] - cols[1][1] / 2, mid, { size: 18, align: "center", color: BLUE });
+        if (amount) txt(p, amount, xs[5] - cols[5][1] / 2, mid, { size: 18, align: "center", color: BLUE });
+        if (r.meals) ["בוקר", "צהריים", "ערב"].forEach((m, j) => {
+          const cb = tr.querySelector(`[data-m="${m}"]`), on = cb && cb.checked, cx = xs[2 + j] - cols[2 + j][1] / 2;
+          const cnt = on ? (+(tr.querySelector(`[data-cnt="${m}"]`).value) || 1) : 0;
+          box(p, cx - (cnt > 1 ? 22 : 11), ty + each / 2 - 11, 22, on);
+          if (cnt > 1) txt(p, String(cnt), cx + 6, mid, { size: 18, align: "left", color: BLUE });
+        });
+      });
+      y += h;
+    });
+    p.y = y + 46;
+    txt(p, "הצהרה", PW / 2, p.y, { size: 24, bold: true, align: "center", underline: true }); p.y += 40;
+    wrap(p, SETTLE_DECL, { bold: true, size: 22, after: 2 });
+    wrap(p, SETTLE_DECL2, { bold: true, size: 22, after: 22 });
+    fieldRow(p, [["שם הנוסע", v("signName"), 1.2], ["ת.ז", v("signId"), 1], ["אגף/חייל ותפקיד", v("unit"), 1.3], ["דרגה", v("signRank"), .7]], { lh: 30 });
+    const sy = p.y;
+    txt(p, "חתימת הנוסע:", RIGHT, sy + 70, { size: 22, bold: true });
+    sigImg(p, form, "main", RIGHT - 520, sy, 340, 80);
+    g.fillStyle = INK; g.fillRect(RIGHT - 520, sy + 82, 340, 1.5);
+    return [p];
+  }
+
+  // עטיפת תמונות JPEG בקובץ PDF (A4)
+  function pagesToPdf(pages) {
+    const enc = new TextEncoder(), parts = [], offsets = [];
+    let len = 0;
+    const push = b => { const u = typeof b === "string" ? enc.encode(b) : b; parts.push(u); len += u.length; };
+    const obj = (n, body) => { offsets[n] = len; push(`${n} 0 obj\n`); body(); push("\nendobj\n"); };
+    push("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
+    const n = pages.length, kids = pages.map((_, i) => `${3 + i * 3} 0 R`).join(" ");
+    obj(1, () => push("<< /Type /Catalog /Pages 2 0 R >>"));
+    obj(2, () => push(`<< /Type /Pages /Kids [${kids}] /Count ${n} >>`));
+    pages.forEach((pg, i) => {
+      const pn = 3 + i * 3, cn = pn + 1, im = pn + 2;
+      const b64 = pg.c.toDataURL("image/jpeg", 0.85).split(",")[1], bin = atob(b64), jpg = new Uint8Array(bin.length);
+      for (let k = 0; k < bin.length; k++) jpg[k] = bin.charCodeAt(k);
+      const content = `q 595.28 0 0 841.89 0 0 cm /Im${i} Do Q`;
+      obj(pn, () => push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im${i} ${im} 0 R >> >> /Contents ${cn} 0 R >>`));
+      obj(cn, () => { push(`<< /Length ${content.length} >>\nstream\n`); push(content); push("\nendstream"); });
+      obj(im, () => { push(`<< /Type /XObject /Subtype /Image /Width ${PW} /Height ${PH} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpg.length} >>\nstream\n`); push(jpg); push("\nendstream"); });
+      pg.c.remove();
+    });
+    const xref = len, total = 3 + n * 3;
+    push(`xref\n0 ${total}\n0000000000 65535 f \n`);
+    for (let k = 1; k < total; k++) push(String(offsets[k]).padStart(10, "0") + " 00000 n \n");
+    push(`trailer\n<< /Size ${total} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);
+    return new Blob(parts, { type: "application/pdf" });
+  }
+  function makePdf(kind, form) {
+    const blob = pagesToPdf(kind === "advance" ? drawAdvance(form) : drawSettle(form));
+    const name = `${kind === "advance" ? "מקדמה" : "התחשבנות"} - ${val(form, "name") || "טופס"}.pdf`;
+    return new File([blob], name, { type: "application/pdf" });
   }
 
   // ---------- שמירת טיוטה במכשיר (localStorage) ----------
@@ -650,19 +850,29 @@
     if (pr) {
       const kind = pr.dataset.print, form = document.querySelector(`[data-form="${kind}"]`), box = pr.closest("[data-actions]");
       if (!checkForm(kind, form, box, false)) return;
-      if (!signed(form, "main") && !confirm("לא חתמת על הטופס. להמשיך בלי חתימה (למשל כדי לחתום ביד אחרי ההדפסה)?")) return;
-      const tip = box.querySelector("[data-tip]");
-      tip.textContent = IS_IOS ? "במסך שנפתח לוחצים על סמל השיתוף (⬆︎) למעלה, ובוחרים וואטסאפ. הטופס יישלח כקובץ PDF."
-        : IS_ANDROID ? "במסך שנפתח בוחרים \"שמירה כ-PDF\", ואחרי השמירה לוחצים \"שיתוף\" ובוחרים וואטסאפ."
-        : "במסך שנפתח בוחרים \"שמירה כ-PDF\" (Save as PDF), ואז שולחים את הקובץ בוואטסאפ.";
-      say(box, "", true);
+      if (!signed(form, "main") && !confirm("לא חתמת על הטופס. להמשיך בלי חתימה?")) return;
       saveDraft(form);
-      const oldTitle = document.title;
-      document.title = (kind === "advance" ? "מקדמה" : "התחשבנות") + " - " + (val(form, "name") || "טופס");
-      window.print();
-      document.title = oldTitle;
+      let file;
+      try { file = makePdf(kind, form); } catch (err) { need(box, "לא הצלחתי ליצור את קובץ ה-PDF במכשיר הזה. אפשר להשתמש ב\"הדפסה\" ולשמור כ-PDF."); return; }
+      const tip = box.querySelector("[data-tip]");
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: file.name }).then(() => {
+          tip.textContent = "הטופס נשלח. לא לשכוח לשלוח באותו צ'אט גם את שאר המסמכים.";
+        }).catch(err => {
+          if (err && err.name === "AbortError") return;
+          downloadFile(file); tip.textContent = "הקובץ ירד למכשיר. פותחים וואטסאפ ומצרפים אותו.";
+        });
+        tip.textContent = "בחלון השיתוף בוחרים וואטסאפ, ואז את איש הקשר.";
+      } else {
+        downloadFile(file);
+        tip.textContent = "קובץ ה-PDF ירד למחשב. נפתח וואטסאפ – מצרפים בצ'אט את הקובץ שירד.";
+        const url = `https://wa.me/${waNumber()}?text=${encodeURIComponent(`${DOCS.find(x => x.id === kind).title} – ${val(form, "name")}. מצורף הטופס (PDF).`)}`;
+        setTimeout(() => { const w = window.open(url, "_blank"); if (!w) location.href = url; }, 400);
+      }
       return;
     }
+    const pp = e.target.closest("[data-printpaper]");
+    if (pp) { window.print(); return; }
     const cl = e.target.closest("[data-clear]");
     if (cl) {
       if (!confirm("למחוק את כל מה שמילאת בטופס הזה?")) return;
